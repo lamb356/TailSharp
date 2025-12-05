@@ -8,6 +8,7 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { NotificationBell } from '@/components/ui/NotificationBell';
 import { CopyTradePanel } from '@/components/traders/CopyTradePanel';
 import Link from 'next/link';
+export const dynamic = 'force-dynamic';
 
 // Enable this for testing without wallet
 const DEV_MODE = true;
