@@ -102,7 +102,7 @@ export const getTransactionDetail = async (
 
     return {
       signature,
-      timestamp: tx.blockTime,
+      timestamp: tx.blockTime ?? null,
       success: tx.meta?.err === null,
       fee: tx.meta?.fee || 0,
       instructions,
