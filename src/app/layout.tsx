@@ -5,6 +5,7 @@ import './globals.css';
 import { WalletProvider } from '@/components/wallet/WalletProvider';
 import { QueryProvider } from '@/components/providers/QueryProvider';
 import { TransactionWatcher } from '@/components/providers/TransactionWatcher';
+export const dynamic = 'force-dynamic';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
