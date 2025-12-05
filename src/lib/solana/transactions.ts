@@ -41,7 +41,7 @@ export const getRecentTransactions = async (
   return signatures.map((sig) => ({
     signature: sig.signature,
     slot: sig.slot,
-    timestamp: sig.blockTime,
+    timestamp: sig.blockTime ?? null,
     success: sig.err === null,
     fee: 0, // We'd need to fetch full tx for this
     type: 'unknown' as const,
