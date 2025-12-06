@@ -1,0 +1,15 @@
+{
+  "signature": "test-sig-123456789",
+  "timestamp": 1733515200,
+  "type": "SWAP",
+  "description": "Swapped 100 USDC for prediction market tokens",
+  "source": "KALSHI",
+  "fee": 5000,
+  "feePayer": "4Nd1mBQtrMJVYVfKf2PJy9NZUZdTAsp7D4xWLs4gDB4T",
+  "tokenTransfers": [
+    {
+      "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "amount": 100
+    }
+  ]
+}

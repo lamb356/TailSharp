@@ -1,6 +1,12 @@
 // src/app/api/webhook/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { kv } from '@vercel/kv';
+import Redis from 'ioredis';
+import { parseTransaction, isPredictionMarketTrade } from '@/lib/trading/transactionParser';
+import { shouldCopyTrade } from '@/lib/trading/copyEngine';
+import { executeCopyTrade } from '@/lib/trading/tradeExecutor';
+
+// Initialize Redis with the URL directly
+const redis = new Redis(process.env.KV_REDIS_URL!);
 
 export async function POST(request: NextRequest) {
   try {
@@ -8,11 +14,9 @@ export async function POST(request: NextRequest) {
 
     console.log('Webhook received:', JSON.stringify(payload, null, 2));
 
-    // Helius sends an array of transactions
     const transactions = Array.isArray(payload) ? payload : [payload];
 
     for (const tx of transactions) {
-      // Extract relevant info from enhanced transaction
       const enrichedTx = {
         signature: tx.signature,
         timestamp: tx.timestamp || Date.now() / 1000,
@@ -26,24 +30,43 @@ export async function POST(request: NextRequest) {
         accountData: tx.accountData || [],
       };
 
-      // Store by fee payer (the wallet we're tracking)
       const walletAddress = tx.feePayer;
       if (walletAddress) {
         const key = `wallet:${walletAddress}:transactions`;
         
-        // Get existing transactions
-        const existing = await kv.lrange(key, 0, 49) || [];
-        
-        // Add new transaction to the front
-        await kv.lpush(key, JSON.stringify(enrichedTx));
-        
-        // Keep only last 50 transactions
-        await kv.ltrim(key, 0, 49);
-        
-        // Set expiration to 30 days
-        await kv.expire(key, 60 * 60 * 24 * 30);
+        await redis.lpush(key, JSON.stringify(enrichedTx));
+        await redis.ltrim(key, 0, 49);
+        await redis.expire(key, 60 * 60 * 24 * 30);
 
-        console.log(`Transaction from ${walletAddress}: ${tx.type} - ${tx.description}`);
+        console.log(`Transaction stored: ${tx.signature}`);
+
+        if (isPredictionMarketTrade(tx)) {
+          const parsedTrade = parseTransaction(tx);
+          
+          if (parsedTrade) {
+            console.log('Prediction market trade detected:', parsedTrade);
+
+            const settingsKey = 'copy-settings';
+            const settingsData = await redis.get(settingsKey);
+            const settings = settingsData ? JSON.parse(settingsData) : [];
+
+            const decision = shouldCopyTrade(parsedTrade, settings);
+
+            if (decision.shouldCopy) {
+              console.log('Executing auto-copy trade:', decision);
+
+              const executedTrade = await executeCopyTrade(parsedTrade, decision);
+
+              const tradesKey = 'executed-trades';
+              await redis.lpush(tradesKey, JSON.stringify(executedTrade));
+              await redis.ltrim(tradesKey, 0, 99);
+
+              console.log('Copy trade executed:', executedTrade);
+            } else {
+              console.log('Trade not copied:', decision.reason);
+            }
+          }
+        }
       }
     }
 
@@ -55,7 +78,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET endpoint to retrieve recent transactions for a wallet
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const wallet = searchParams.get('wallet');
@@ -66,12 +88,9 @@ export async function GET(request: NextRequest) {
 
   try {
     const key = `wallet:${wallet}:transactions`;
-    const transactions = await kv.lrange(key, 0, 49);
+    const transactions = await redis.lrange(key, 0, 49);
     
-    // Parse JSON strings back to objects
-    const parsed = transactions.map((tx: any) => 
-      typeof tx === 'string' ? JSON.parse(tx) : tx
-    );
+    const parsed = transactions.map((tx: string) => JSON.parse(tx));
 
     return NextResponse.json({
       wallet,
