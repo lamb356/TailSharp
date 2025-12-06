@@ -1,10 +1,17 @@
 // src/app/api/webhook/register/route.ts
 import { NextRequest, NextResponse } from 'next/server';
+import Redis from 'ioredis';
 
 const HELIUS_API_KEY = process.env.NEXT_PUBLIC_HELIUS_API_KEY;
 const WEBHOOK_URL = process.env.NEXT_PUBLIC_APP_URL
   ? `${process.env.NEXT_PUBLIC_APP_URL}/api/webhook`
   : 'https://tail-sharp.vercel.app/api/webhook';
+
+// Initialize Redis
+const redis = new Redis(process.env.KV_REDIS_URL!);
+
+// Test Redis connection
+redis.ping().then(() => console.log('✅ Redis connected')).catch((err) => console.error('❌ Redis error:', err));
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,10 +36,11 @@ export async function POST(request: NextRequest) {
     let heliusUrl: string;
     let method: string;
     let body: object;
+    let webhookId: string;
 
     if (existingWebhooks.length > 0) {
       // UPDATE existing webhook - add new address to it
-      const webhookId = existingWebhooks[0].webhookID;
+      webhookId = existingWebhooks[0].webhookID;
       
       // IMPORTANT: Fetch the LATEST state of this specific webhook to avoid race conditions
       const currentWebhookResponse = await fetch(
@@ -41,7 +49,27 @@ export async function POST(request: NextRequest) {
       const currentWebhook = await currentWebhookResponse.json();
       const currentAddresses: string[] = currentWebhook.accountAddresses || [];
       
-      // Skip if already tracking this address
+      // Store to Redis BEFORE checking if already tracked
+      console.log('💾 Storing to Redis...');
+      const settingsKey = 'copy-settings';
+      const existingSettingsData = await redis.get(settingsKey);
+      console.log('📖 Existing settings:', existingSettingsData);
+      const settings = existingSettingsData ? JSON.parse(existingSettingsData) : [];
+
+      if (!settings.find((s: any) => s.traderId === walletAddress)) {
+        settings.push({
+          traderId: walletAddress,
+          isActive: true,
+          allocationUsd: 100,
+          maxPositionPercent: 25,
+        });
+        await redis.set(settingsKey, JSON.stringify(settings));
+        console.log('✅ Added to copy settings:', walletAddress);
+      } else {
+        console.log('⏭️ Already in copy settings:', walletAddress);
+      }
+
+      // Skip Helius update if already tracking this address
       if (currentAddresses.includes(walletAddress)) {
         return NextResponse.json({
           success: true,
@@ -70,6 +98,7 @@ export async function POST(request: NextRequest) {
         webhookType: 'enhanced',
       };
       console.log('Creating new webhook');
+      webhookId = '';
     }
 
     const response = await fetch(heliusUrl, {
@@ -91,9 +120,28 @@ export async function POST(request: NextRequest) {
 
     const data = JSON.parse(responseText);
 
+    // For new webhooks, also store to Redis
+    if (!existingWebhooks.length) {
+      console.log('💾 Storing to Redis (new webhook)...');
+      const settingsKey = 'copy-settings';
+      const existingSettingsData = await redis.get(settingsKey);
+      const settings = existingSettingsData ? JSON.parse(existingSettingsData) : [];
+
+      if (!settings.find((s: any) => s.traderId === walletAddress)) {
+        settings.push({
+          traderId: walletAddress,
+          isActive: true,
+          allocationUsd: 100,
+          maxPositionPercent: 25,
+        });
+        await redis.set(settingsKey, JSON.stringify(settings));
+        console.log('✅ Added to copy settings:', walletAddress);
+      }
+    }
+
     return NextResponse.json({
       success: true,
-      webhookId: data.webhookID,
+      webhookId: data.webhookID || webhookId,
       message: `Now tracking wallet: ${walletAddress}`
     });
 
