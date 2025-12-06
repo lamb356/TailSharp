@@ -8,11 +8,12 @@ import { NotificationBell } from '@/components/ui/NotificationBell';
 import { Market, getMarket, formatPrice, formatVolume, placeOrder } from '@/lib/dflow/api';
 import { useNotifications } from '@/lib/store/useNotifications';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function MarketDetail() {
   const params = useParams();
   const marketId = params.id as string;
-  
+
   const [market, setMarket] = useState<Market | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedSide, setSelectedSide] = useState<'yes' | 'no'>('yes');
@@ -78,7 +79,7 @@ export default function MarketDetail() {
       <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
         <nav className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-teal-400 rounded-lg" />
+            <Image src="/logo.jpg" alt="TailSharp" width={32} height={32} className="rounded-lg" />
             <span className="text-xl font-bold text-white">TailSharp</span>
           </Link>
         </nav>
@@ -98,7 +99,7 @@ export default function MarketDetail() {
       <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
         <nav className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-teal-400 rounded-lg" />
+            <Image src="/logo.jpg" alt="TailSharp" width={32} height={32} className="rounded-lg" />
             <span className="text-xl font-bold text-white">TailSharp</span>
           </Link>
         </nav>
@@ -116,7 +117,7 @@ export default function MarketDetail() {
     <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
       <nav className="flex items-center justify-between px-6 py-4 border-b border-slate-800 sticky top-0 bg-slate-950/80 backdrop-blur-md z-50">
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-teal-400 rounded-lg" />
+          <Image src="/logo.jpg" alt="TailSharp" width={32} height={32} className="rounded-lg" />
           <span className="text-xl font-bold text-white">TailSharp</span>
         </Link>
         <div className="flex items-center gap-4">

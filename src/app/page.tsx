@@ -3,6 +3,7 @@ import { ConnectButton } from '@/components/wallet/ConnectButton';
 import { Leaderboard } from '@/components/traders/Leaderboard';
 import { NotificationBell } from '@/components/ui/NotificationBell';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Home() {
   return (
@@ -10,7 +11,7 @@ export default function Home() {
       {/* Header */}
       <nav className="flex items-center justify-between px-6 py-4 border-b border-slate-800 sticky top-0 bg-slate-950/80 backdrop-blur-md z-50">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-teal-400 rounded-lg" />
+        <Image src="/logo.jpg" alt="TailSharp" width={32} height={32} className="rounded-lg" />
           <span className="text-xl font-bold text-white">TailSharp</span>
         </div>
         <div className="flex items-center gap-4">

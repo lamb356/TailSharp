@@ -8,6 +8,8 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { NotificationBell } from '@/components/ui/NotificationBell';
 import { CopyTradePanel } from '@/components/traders/CopyTradePanel';
 import Link from 'next/link';
+import Image from 'next/image';
+
 export const dynamic = 'force-dynamic';
 
 // Enable this for testing without wallet
@@ -26,7 +28,7 @@ export default function Dashboard() {
       <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
         <nav className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-teal-400 rounded-lg" />
+            <Image src="/logo.jpg" alt="TailSharp" width={32} height={32} className="rounded-lg" />
             <span className="text-xl font-bold text-white">TailSharp</span>
           </Link>
           <ConnectButton />
@@ -45,7 +47,7 @@ export default function Dashboard() {
       {/* Header */}
       <nav className="flex items-center justify-between px-6 py-4 border-b border-slate-800 sticky top-0 bg-slate-950/80 backdrop-blur-md z-50">
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-teal-400 rounded-lg" />
+          <Image src="/logo.jpg" alt="TailSharp" width={32} height={32} className="rounded-lg" />
           <span className="text-xl font-bold text-white">TailSharp</span>
         </Link>
         <div className="flex items-center gap-4">

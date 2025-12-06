@@ -9,6 +9,7 @@ export interface Transaction {
   success: boolean;
   fee: number;
   type: 'unknown' | 'transfer' | 'swap' | 'stake' | 'other';
+  description?: string;
 }
 
 export interface TransactionDetail {
@@ -27,7 +28,7 @@ export interface BalanceChange {
 }
 
 /**
- * Get recent transaction signatures for a wallet
+ * Get recent transaction signatures for a wallet (from RPC)
  */
 export const getRecentTransactions = async (
   walletAddress: string,
@@ -43,9 +44,67 @@ export const getRecentTransactions = async (
     slot: sig.slot,
     timestamp: sig.blockTime ?? null,
     success: sig.err === null,
-    fee: 0, // We'd need to fetch full tx for this
+    fee: 0,
     type: 'unknown' as const,
   }));
+};
+
+/**
+ * Get transactions from webhook cache (real-time tracked data)
+ */
+export const getWebhookTransactions = async (
+  walletAddress: string
+): Promise<Transaction[]> => {
+  try {
+    const response = await fetch(`/api/webhook?wallet=${walletAddress}`);
+    if (!response.ok) return [];
+    
+    const data = await response.json();
+    
+    return data.transactions.map((tx: any) => ({
+      signature: tx.signature,
+      slot: 0,
+      timestamp: tx.timestamp ?? null,
+      success: true,
+      fee: tx.fee || 0,
+      type: mapTransactionType(tx.type),
+      description: tx.description,
+    }));
+  } catch (error) {
+    console.error('Failed to fetch webhook transactions:', error);
+    return [];
+  }
+};
+
+const mapTransactionType = (heliusType: string): Transaction['type'] => {
+  const typeMap: Record<string, Transaction['type']> = {
+    'TRANSFER': 'transfer',
+    'SWAP': 'swap',
+    'STAKE': 'stake',
+  };
+  return typeMap[heliusType] || 'other';
+};
+
+/**
+ * Get combined transactions (webhook + RPC fallback)
+ */
+export const getCombinedTransactions = async (
+  walletAddress: string,
+  limit: number = 10
+): Promise<Transaction[]> => {
+  const [webhookTxs, rpcTxs] = await Promise.all([
+    getWebhookTransactions(walletAddress),
+    getRecentTransactions(walletAddress, limit),
+  ]);
+
+  const txMap = new Map<string, Transaction>();
+  
+  rpcTxs.forEach(tx => txMap.set(tx.signature, tx));
+  webhookTxs.forEach(tx => txMap.set(tx.signature, tx));
+  
+  return Array.from(txMap.values())
+    .sort((a, b) => (b.timestamp ?? 0) - (a.timestamp ?? 0))
+    .slice(0, limit);
 };
 
 /**
@@ -73,9 +132,8 @@ export const getTransactionDetail = async (
       return 'unknown';
     });
 
-    // Parse balance changes from pre/post token balances
     const balanceChanges: BalanceChange[] = [];
-    
+
     if (tx.meta?.preTokenBalances && tx.meta?.postTokenBalances) {
       const preBalances = new Map(
         tx.meta.preTokenBalances.map((b) => [

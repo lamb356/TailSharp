@@ -12,9 +12,12 @@ interface AppState {
 
   // User's copy settings
   copySettings: CopySettings[];
-  addCopySettings: (settings: CopySettings) => void;
+  addCopySettings: (settings: CopySettings) => Promise<void>;
   removeCopySettings: (traderId: string) => void;
   updateCopySettings: (traderId: string, data: Partial<CopySettings>) => void;
+
+  // Webhook IDs (to track registered webhooks)
+  webhookIds: Record<string, string>;
 
   // UI State
   isLoading: boolean;
@@ -23,7 +26,7 @@ interface AppState {
 
 export const useStore = create<AppState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       // Traders
       trackedTraders: [],
       addTrader: (trader) =>
@@ -41,12 +44,40 @@ export const useStore = create<AppState>()(
           ),
         })),
 
-      // Copy Settings
+      // Copy Settings - now registers webhook with Helius
       copySettings: [],
-      addCopySettings: (settings) =>
+      addCopySettings: async (settings) => {
+        // Add to local state first
         set((state) => ({
           copySettings: [...state.copySettings, settings],
-        })),
+        }));
+
+        // Register webhook with Helius
+        try {
+          const response = await fetch('/api/webhook/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ walletAddress: settings.traderId }),
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            console.log('Webhook registered:', data);
+            
+            // Store webhook ID
+            if (data.webhookId) {
+              set((state) => ({
+                webhookIds: { ...state.webhookIds, [settings.traderId]: data.webhookId },
+              }));
+            }
+                  } else {
+            const errorData = await response.text();
+            console.error('Failed to register webhook:', response.status, errorData);
+          } 
+        } catch (error) {
+          console.error('Webhook registration error:', error);
+        }
+      },
       removeCopySettings: (traderId) =>
         set((state) => ({
           copySettings: state.copySettings.filter((s) => s.traderId !== traderId),
@@ -57,6 +88,9 @@ export const useStore = create<AppState>()(
             s.traderId === traderId ? { ...s, ...data } : s
           ),
         })),
+
+      // Webhook tracking
+      webhookIds: {},
 
       // UI
       isLoading: false,

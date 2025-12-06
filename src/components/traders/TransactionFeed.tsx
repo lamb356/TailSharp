@@ -4,7 +4,7 @@
 import { FC, useEffect, useState } from 'react';
 import {
   Transaction,
-  getRecentTransactions,
+  getCombinedTransactions,
   formatTimeAgo,
   shortenSignature,
 } from '@/lib/solana/transactions';
@@ -28,7 +28,7 @@ export const TransactionFeed: FC<TransactionFeedProps> = ({
       setError(null);
 
       try {
-        const txs = await getRecentTransactions(walletAddress, limit);
+        const txs = await getCombinedTransactions(walletAddress, limit);
         setTransactions(txs);
       } catch (err) {
         console.error('Failed to fetch transactions:', err);
@@ -79,9 +79,16 @@ export const TransactionFeed: FC<TransactionFeedProps> = ({
                 tx.success ? 'bg-green-400' : 'bg-red-400'
               }`}
             />
-            <span className="text-slate-300 font-mono text-sm">
-              {shortenSignature(tx.signature)}
-            </span>
+            <div className="flex flex-col">
+              <span className="text-slate-300 font-mono text-sm">
+                {shortenSignature(tx.signature)}
+              </span>
+              {tx.description && (
+                <span className="text-slate-500 text-xs truncate max-w-[200px]">
+                  {tx.description}
+                </span>
+              )}
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <span className="text-slate-500 text-sm">
