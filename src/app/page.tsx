@@ -5,6 +5,7 @@ import { NotificationBell } from '@/components/ui/NotificationBell';
 import Link from 'next/link';
 import Image from 'next/image';
 
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
@@ -24,10 +25,14 @@ export default function Home() {
           <Link href="/dashboard" className="text-slate-400 hover:text-white transition-colors">
             Dashboard
           </Link>
+          <Link href="/copy-trades" className="text-slate-400 hover:text-white transition-colors">
+            Copy Trades
+          </Link>
           <NotificationBell />
           <ConnectButton />
         </div>
       </nav>
+
 
       {/* Hero */}
       <section className="flex flex-col items-center justify-center px-6 py-20 text-center">
@@ -56,6 +61,7 @@ export default function Home() {
         </div>
       </section>
 
+
       {/* Stats */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6 px-6 max-w-5xl mx-auto mb-12">
         <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 text-center">
@@ -72,8 +78,10 @@ export default function Home() {
         </div>
       </section>
 
+
       {/* Leaderboard */}
       <Leaderboard />
+
 
       {/* Footer */}
       <footer className="border-t border-slate-800 mt-20 py-8 px-6 text-center text-slate-500 text-sm">
