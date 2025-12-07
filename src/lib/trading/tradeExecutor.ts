@@ -52,8 +52,8 @@ export async function executeCopyTrade(
     const balanceData = await client.getBalance();
     console.log('💰 Current Kalshi balance:', balanceData.balance);
 
-    // Calculate position size in number of contracts
-    const numContracts = Math.ceil(decision.positionSize);
+    // Calculate position size in number of contracts (with fallback)
+    const numContracts = Math.ceil(decision.positionSize || 1);
     
     // Estimate max cost (assuming worst case: buying at 99 cents per contract)
     const estimatedCost = numContracts * 99;
@@ -66,14 +66,14 @@ export async function executeCopyTrade(
     console.log('📊 Placing order on Kalshi:', {
       ticker: kalshiTicker,
       contracts: numContracts,
-      side: trade.side === 'long' ? 'yes' : 'no',
+      side: trade.side === 'YES' ? 'yes' : 'no',
     });
 
     const orderResponse = await client.createOrder(
       kalshiTicker,
       'buy',
       numContracts,
-      trade.side === 'long' ? 'yes' : 'no'
+      trade.side === 'YES' ? 'yes' : 'no'
     );
 
     console.log('✅ Kalshi order executed:', orderResponse);
