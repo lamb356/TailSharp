@@ -5,7 +5,7 @@ import { KalshiClient, KalshiMarket } from './client';
  */
 let marketCache: KalshiMarket[] = [];
 let cacheTimestamp = 0;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const CACHE_DURATION = 1 * 60 * 1000; // 1 minute
 
 /**
  * Get all open markets (with caching)
