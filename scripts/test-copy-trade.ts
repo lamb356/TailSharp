@@ -57,7 +57,7 @@ async function testCopyTradeFlow() {
       walletAddress: 'test-wallet',
       timestamp: Date.now() / 1000,
       market: markets[0].title, // Use real market title
-      side: 'YES',              // FIX: must be "YES" | "NO"
+      side: 'YES',              // Must be "YES" | "NO"
       amount: 10,
       price: 0.50,
     };
@@ -66,10 +66,11 @@ async function testCopyTradeFlow() {
       shouldCopy: true,
       reason: 'Test trade',
       positionSize: 1, // Just 1 contract for testing
-      followedTrader: {
-        address: 'test-wallet',
-        allocationPct: 5,
-        maxPositionSize: 100,
+      settings: {
+        traderId: 'test-wallet',
+        isActive: true,
+        allocationUsd: 100,
+        maxPositionPercent: 25,
       },
     };
 
