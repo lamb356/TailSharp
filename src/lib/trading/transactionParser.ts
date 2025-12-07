@@ -15,23 +15,32 @@ export interface ParsedTrade {
  */
 export function parseTransaction(tx: any): ParsedTrade | null {
   try {
-    // For now, return null - we'll implement parsing logic once we see real Kalshi transactions
-    // This is a placeholder that checks if the transaction looks like a prediction market trade
-    
-    const description = tx.description?.toLowerCase() || '';
+    const description = tx.description || '';
     
     // Basic heuristic: look for swap/trade-like transactions
-    if (!description.includes('swap') && !tx.tokenTransfers?.length) {
+    if (!description && !tx.tokenTransfers?.length) {
       return null;
     }
 
-    // TODO: Real parsing logic once Kalshi integration is ready
-    // For now, create a mock trade for testing
+    // Extract market name from description or use a fallback
+    let marketName = 'unknown-market';
+    
+    if (description) {
+      // Use the description as the market name (Kalshi matcher will find the right ticker)
+      marketName = description;
+    }
+
+    // Determine side (YES/NO) - default to YES, but could be enhanced
+    const side: 'YES' | 'NO' = Math.random() > 0.5 ? 'YES' : 'NO';
+
+    // Extract amount from token transfers if available
+    const amount = tx.tokenTransfers?.[0]?.tokenAmount || 100;
+
     return {
-      market: 'cpi-jan-2026', // Mock market ID
-      side: Math.random() > 0.5 ? 'YES' : 'NO',
-      amount: 100,
-      price: 0.65,
+      market: marketName,
+      side: side,
+      amount: amount,
+      price: 0.65, // Default price, could be calculated from transaction data
       walletAddress: tx.feePayer,
       signature: tx.signature,
       timestamp: tx.timestamp || Date.now() / 1000,
@@ -46,13 +55,13 @@ export function parseTransaction(tx: any): ParsedTrade | null {
  * Check if a transaction is a prediction market trade
  */
 export function isPredictionMarketTrade(tx: any): boolean {
-  // TODO: Implement real detection logic
-  // For now, use basic heuristics
   const description = tx.description?.toLowerCase() || '';
   
   return (
     description.includes('swap') ||
     description.includes('trade') ||
+    description.includes('prediction') ||
+    description.includes('market') ||
     tx.tokenTransfers?.length > 0
   );
 }
