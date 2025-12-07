@@ -57,7 +57,7 @@ async function testCopyTradeFlow() {
       walletAddress: 'test-wallet',
       timestamp: Date.now() / 1000,
       market: markets[0].title, // Use real market title
-      side: 'long',
+      side: 'YES',              // FIX: must be "YES" | "NO"
       amount: 10,
       price: 0.50,
     };
