@@ -14,16 +14,19 @@ export interface ExecutedTrade {
   ourOrderId?: string;
   kalshiTicker?: string;
   kalshiResponse?: any;
+  isSimulation?: boolean;
 }
 
 /**
  * Execute a copy trade via Kalshi API with smart market matching
+ * Supports simulation mode for testing without real funds
  */
 export async function executeCopyTrade(
   trade: ParsedTrade,
   decision: CopyDecision
 ): Promise<ExecutedTrade> {
   const tradeId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  const isSimulation = process.env.TAILSHARP_SIMULATION === 'true';
 
   try {
     console.log('🔄 Executing copy trade:', {
@@ -31,6 +34,7 @@ export async function executeCopyTrade(
       side: trade.side,
       amount: decision.positionSize,
       originalTrader: trade.walletAddress,
+      simulation: isSimulation,
     });
 
     // Initialize Kalshi client
@@ -48,12 +52,48 @@ export async function executeCopyTrade(
       throw new Error(`No matching Kalshi market found for: ${trade.market}`);
     }
 
-    // Check balance before trading
-    const balanceData = await client.getBalance();
-    console.log('💰 Current Kalshi balance:', balanceData.balance);
-
     // Calculate position size in number of contracts (with fallback)
     const numContracts = Math.ceil(decision.positionSize || 1);
+
+    // SIMULATION MODE - Skip real Kalshi calls
+    if (isSimulation) {
+      console.log('🎮 SIMULATION MODE: Skipping real Kalshi API calls');
+      console.log('📊 Simulated order:', {
+        ticker: kalshiTicker,
+        contracts: numContracts,
+        side: trade.side === 'YES' ? 'yes' : 'no',
+      });
+
+      // Simulate a 2-second delay like a real API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      return {
+        id: tradeId,
+        originalTrade: trade,
+        decision,
+        status: 'executed',
+        executedAt: Date.now() / 1000,
+        ourOrderId: `sim-order-${tradeId}`,
+        kalshiTicker,
+        kalshiResponse: {
+          simulated: true,
+          order: {
+            order_id: `sim-order-${tradeId}`,
+            ticker: kalshiTicker,
+            side: trade.side === 'YES' ? 'yes' : 'no',
+            action: 'buy',
+            count: numContracts,
+            status: 'filled',
+          }
+        },
+        isSimulation: true,
+      };
+    }
+
+    // REAL MODE - Execute actual Kalshi trades
+    console.log('💰 Checking Kalshi balance...');
+    const balanceData = await client.getBalance();
+    console.log('Current balance:', balanceData.balance);
     
     // Estimate max cost (assuming worst case: buying at 99 cents per contract)
     const estimatedCost = numContracts * 99;
@@ -87,6 +127,7 @@ export async function executeCopyTrade(
       ourOrderId: orderResponse.order?.order_id || 'unknown',
       kalshiTicker,
       kalshiResponse: orderResponse,
+      isSimulation: false,
     };
   } catch (error) {
     console.error('❌ Trade execution failed:', error);
@@ -97,6 +138,7 @@ export async function executeCopyTrade(
       decision,
       status: 'failed',
       error: error instanceof Error ? error.message : 'Unknown error',
+      isSimulation,
     };
   }
 }
