@@ -18,7 +18,12 @@ export class KalshiClient {
 
   constructor(apiKeyId: string, privateKey: string, isDemo = true) {
     this.apiKeyId = apiKeyId;
-    this.privateKey = privateKey;
+    
+    // Decode base64 if needed (for Vercel compatibility)
+    this.privateKey = privateKey.includes('BEGIN') 
+      ? privateKey 
+      : Buffer.from(privateKey, 'base64').toString('utf-8');
+    
     this.baseUrl = isDemo 
       ? 'https://demo-api.kalshi.co' 
       : 'https://api.kalshi.com';
