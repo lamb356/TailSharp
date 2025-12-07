@@ -14,12 +14,19 @@ async function getOpenMarkets(client: KalshiClient): Promise<KalshiMarket[]> {
   const now = Date.now();
   
   if (marketCache.length > 0 && now - cacheTimestamp < CACHE_DURATION) {
+    console.log('📦 Using cached markets:', marketCache.length);
     return marketCache;
   }
   
-  console.log('Fetching fresh market data from Kalshi...');
-  marketCache = await client.searchMarkets({ status: 'open', limit: 1000 });
-  cacheTimestamp = now;
+  console.log('🌐 Fetching fresh market data from Kalshi...');
+  try {
+    marketCache = await client.searchMarkets({ status: 'open', limit: 1000 });
+    cacheTimestamp = now;
+    console.log(`✅ Fetched ${marketCache.length} markets from Kalshi`);
+  } catch (error) {
+    console.error('❌ Failed to fetch markets from Kalshi:', error);
+    marketCache = [];
+  }
   
   return marketCache;
 }
@@ -35,7 +42,7 @@ export async function findMatchingTicker(
     const markets = await getOpenMarkets(client);
     
     if (markets.length === 0) {
-      console.warn('No open markets found on Kalshi');
+      console.warn('⚠️ No open markets found on Kalshi');
       return null;
     }
     
