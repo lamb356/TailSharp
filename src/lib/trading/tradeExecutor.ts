@@ -1,6 +1,8 @@
 // src/lib/trading/tradeExecutor.ts
 import { ParsedTrade } from './transactionParser';
 import { CopyDecision } from './copyEngine';
+import { KalshiClient } from '../kalshi/client';
+import { findMatchingTicker } from '../kalshi/marketMatcher';
 
 export interface ExecutedTrade {
   id: string;
@@ -9,11 +11,13 @@ export interface ExecutedTrade {
   status: 'pending' | 'executed' | 'failed';
   executedAt?: number;
   error?: string;
-  ourSignature?: string;
+  ourOrderId?: string;
+  kalshiTicker?: string;
+  kalshiResponse?: any;
 }
 
 /**
- * Execute a copy trade (mock for now, will integrate with Kalshi later)
+ * Execute a copy trade via Kalshi API with smart market matching
  */
 export async function executeCopyTrade(
   trade: ParsedTrade,
@@ -22,16 +26,57 @@ export async function executeCopyTrade(
   const tradeId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
   try {
-    console.log('Executing copy trade:', {
+    console.log('🔄 Executing copy trade:', {
       market: trade.market,
       side: trade.side,
       amount: decision.positionSize,
       originalTrader: trade.walletAddress,
     });
 
-    // TODO: Real Kalshi API integration
-    // For now, simulate a successful trade after 2 seconds
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Initialize Kalshi client
+    const client = new KalshiClient(
+      process.env.KALSHI_API_KEY_ID!,
+      process.env.KALSHI_PRIVATE_KEY!,
+      process.env.KALSHI_USE_DEMO === 'true'
+    );
+
+    // Find matching Kalshi ticker
+    console.log('🔍 Finding matching Kalshi market...');
+    const kalshiTicker = await findMatchingTicker(client, trade.market);
+    
+    if (!kalshiTicker) {
+      throw new Error(`No matching Kalshi market found for: ${trade.market}`);
+    }
+
+    // Check balance before trading
+    const balanceData = await client.getBalance();
+    console.log('💰 Current Kalshi balance:', balanceData.balance);
+
+    // Calculate position size in number of contracts
+    const numContracts = Math.ceil(decision.positionSize);
+    
+    // Estimate max cost (assuming worst case: buying at 99 cents per contract)
+    const estimatedCost = numContracts * 99;
+    
+    if (balanceData.balance < estimatedCost) {
+      throw new Error(`Insufficient balance: have $${balanceData.balance / 100}, need ~$${estimatedCost / 100}`);
+    }
+
+    // Execute the order
+    console.log('📊 Placing order on Kalshi:', {
+      ticker: kalshiTicker,
+      contracts: numContracts,
+      side: trade.side === 'long' ? 'yes' : 'no',
+    });
+
+    const orderResponse = await client.createOrder(
+      kalshiTicker,
+      'buy',
+      numContracts,
+      trade.side === 'long' ? 'yes' : 'no'
+    );
+
+    console.log('✅ Kalshi order executed:', orderResponse);
 
     return {
       id: tradeId,
@@ -39,9 +84,13 @@ export async function executeCopyTrade(
       decision,
       status: 'executed',
       executedAt: Date.now() / 1000,
-      ourSignature: `mock-sig-${tradeId}`,
+      ourOrderId: orderResponse.order?.order_id || 'unknown',
+      kalshiTicker,
+      kalshiResponse: orderResponse,
     };
   } catch (error) {
+    console.error('❌ Trade execution failed:', error);
+    
     return {
       id: tradeId,
       originalTrade: trade,
