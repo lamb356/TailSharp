@@ -67,28 +67,19 @@ export class KalshiClient {
       : 'https://api.kalshi.com';
   }
 
-  private signRequest(timestamp: string, method: string, path: string): string {
-    const pathWithoutQuery = path.split('?')[0];
-    const message = `${timestamp}${method}${pathWithoutQuery}`;
+ private signRequest(timestamp: string, method: string, path: string): string {
+  const pathWithoutQuery = path.split('?')[0];
+  const message = `${timestamp}${method}${pathWithoutQuery}`;
 
-    const sign = crypto.createSign('RSA-SHA256');
-    sign.update(message);
-    sign.end();
+  const sign = crypto.createSign('RSA-SHA256');
+  sign.update(message);
+  sign.end();
 
-    const signature = sign.sign(
-      {
-        key: this.privateKey,
-        format: 'pem',
-        // Your Kalshi key is an RSA PKCS#1 key; use pkcs1 so OpenSSL can decode it
-        type: 'pkcs1',
-        padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
-        saltLength: crypto.constants.RSA_PSS_SALTLEN_DIGEST,
-      },
-      'base64'
-    );
+  // Simplified: let Node.js auto-detect the key format
+  const signature = sign.sign(this.privateKey, 'base64');
 
-    return signature;
-  }
+  return signature;
+}
 
   private getHeaders(method: string, path: string) {
     const timestamp = Date.now().toString();
