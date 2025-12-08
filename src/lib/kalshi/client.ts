@@ -47,6 +47,14 @@ function normalizePrivateKey(rawKey: string): string {
     decoded = rawKey;
   }
 
+  // Fix literal \n strings to actual newlines
+  if (decoded.includes('\\n')) {
+    decoded = decoded.replace(/\\n/g, '\n');
+  }
+
+  return decoded;
+}
+
   if (decoded.includes('-----BEGIN')) {
     const lines = decoded.split('\n').map(line => line.trim()).filter(line => line);
     
