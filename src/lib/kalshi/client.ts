@@ -36,10 +36,12 @@ function convertPKCS1toPKCS8(pkcs1Key: string): string {
 }
 
 function normalizePrivateKey(rawKey: string): string {
+  // Already has proper PEM headers
   if (rawKey.includes('-----BEGIN') && rawKey.includes('-----END')) {
     return rawKey;
   }
 
+  // Decode from base64
   let decoded: string;
   try {
     decoded = Buffer.from(rawKey, 'base64').toString('utf-8');
@@ -47,29 +49,9 @@ function normalizePrivateKey(rawKey: string): string {
     decoded = rawKey;
   }
 
-  // Fix literal \n strings to actual newlines
+  // Fix literal \n strings to actual newlines (this is the key fix!)
   if (decoded.includes('\\n')) {
     decoded = decoded.replace(/\\n/g, '\n');
-  }
-
-  return decoded;
-}
-
-  if (decoded.includes('-----BEGIN')) {
-    const lines = decoded.split('\n').map(line => line.trim()).filter(line => line);
-    
-    const headerIndex = lines.findIndex(line => line.includes('BEGIN'));
-    const footerIndex = lines.findIndex(line => line.includes('END'));
-    
-    if (headerIndex !== -1 && footerIndex !== -1) {
-      const header = lines[headerIndex];
-      const footer = lines[footerIndex];
-      const body = lines.slice(headerIndex + 1, footerIndex).join('');
-      
-      const formattedBody = body.match(/.{1,64}/g)?.join('\n') || body;
-      
-      return `${header}\n${formattedBody}\n${footer}`;
-    }
   }
 
   return decoded;
