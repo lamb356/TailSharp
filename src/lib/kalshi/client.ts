@@ -11,28 +11,45 @@ export interface KalshiMarket {
   volume: number;
 }
 
-// Normalize the private key coming from env (base64 or PEM) so OpenSSL on Vercel accepts it
+// Convert PKCS#1 to PKCS#8 format for OpenSSL 3.0 compatibility
+function convertPKCS1toPKCS8(pkcs1Key: string): string {
+  try {
+    // Create a key object from the PKCS#1 key
+    const keyObject = crypto.createPrivateKey({
+      key: pkcs1Key,
+      format: 'pem',
+      type: 'pkcs1',
+    });
+
+    // Export it as PKCS#8
+    const pkcs8Key = keyObject.export({
+      type: 'pkcs8',
+      format: 'pem',
+    });
+
+    return pkcs8Key.toString();
+  } catch (error) {
+    console.error('Error converting key:', error);
+    // If conversion fails, return original
+    return pkcs1Key;
+  }
+}
+
 function normalizePrivateKey(rawKey: string): string {
-  // Already a properly formatted PEM key with proper headers
   if (rawKey.includes('-----BEGIN') && rawKey.includes('-----END')) {
     return rawKey;
   }
 
-  // Decode from base64
   let decoded: string;
   try {
     decoded = Buffer.from(rawKey, 'base64').toString('utf-8');
   } catch (e) {
-    // If decoding fails, assume it's already decoded
     decoded = rawKey;
   }
 
-  // Check if decoded string contains PEM markers
   if (decoded.includes('-----BEGIN')) {
-    // Clean up any whitespace issues and ensure proper formatting
     const lines = decoded.split('\n').map(line => line.trim()).filter(line => line);
     
-    // Extract header, body, and footer
     const headerIndex = lines.findIndex(line => line.includes('BEGIN'));
     const footerIndex = lines.findIndex(line => line.includes('END'));
     
@@ -41,7 +58,6 @@ function normalizePrivateKey(rawKey: string): string {
       const footer = lines[footerIndex];
       const body = lines.slice(headerIndex + 1, footerIndex).join('');
       
-      // Reformat with proper 64-char line breaks (PEM standard)
       const formattedBody = body.match(/.{1,64}/g)?.join('\n') || body;
       
       return `${header}\n${formattedBody}\n${footer}`;
@@ -59,27 +75,37 @@ export class KalshiClient {
   constructor(apiKeyId: string, privateKey: string, isDemo = true) {
     this.apiKeyId = apiKeyId;
 
-    // Normalize for Vercel / OpenSSL 3 strict parsing
-    this.privateKey = normalizePrivateKey(privateKey);
+    const normalizedKey = normalizePrivateKey(privateKey);
+    
+    // Convert PKCS#1 to PKCS#8 for Vercel OpenSSL 3.0 compatibility
+    this.privateKey = convertPKCS1toPKCS8(normalizedKey);
 
     this.baseUrl = isDemo
       ? 'https://demo-api.kalshi.co'
       : 'https://api.kalshi.com';
   }
 
- private signRequest(timestamp: string, method: string, path: string): string {
-  const pathWithoutQuery = path.split('?')[0];
-  const message = `${timestamp}${method}${pathWithoutQuery}`;
+  private signRequest(timestamp: string, method: string, path: string): string {
+    const pathWithoutQuery = path.split('?')[0];
+    const message = `${timestamp}${method}${pathWithoutQuery}`;
 
-  const sign = crypto.createSign('RSA-SHA256');
-  sign.update(message);
-  sign.end();
+    const sign = crypto.createSign('RSA-SHA256');
+    sign.update(message);
+    sign.end();
 
-  // Simplified: let Node.js auto-detect the key format
-  const signature = sign.sign(this.privateKey, 'base64');
+    const signature = sign.sign(
+      {
+        key: this.privateKey,
+        format: 'pem',
+        type: 'pkcs8',
+        padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
+        saltLength: crypto.constants.RSA_PSS_SALTLEN_DIGEST,
+      },
+      'base64'
+    );
 
-  return signature;
-}
+    return signature;
+  }
 
   private getHeaders(method: string, path: string) {
     const timestamp = Date.now().toString();
