@@ -46,40 +46,67 @@ export async function findMatchingTicker(
       return null;
     }
     
-    // Normalize search string
-    const searchTerms = marketDescription
-      .toLowerCase()
+    // Normalize and extract key terms
+    const normalized = marketDescription.toLowerCase().trim();
+    
+    // Extract key entities and concepts
+    const searchTerms = normalized
       .replace(/[^a-z0-9\s]/g, ' ')
       .split(/\s+/)
-      .filter(term => term.length > 2);
+      .filter(term => term.length > 2)
+      // Filter out common words
+      .filter(term => !['the', 'will', 'wins', 'win', 'election', 'market'].includes(term));
     
-    console.log('Searching for market with terms:', searchTerms);
+    console.log('🔍 Searching for market with terms:', searchTerms);
     
-    // Score each market based on keyword matches
+    // Score each market with weighted criteria
     const scoredMarkets = markets.map(market => {
       const searchableText = `${market.title} ${market.subtitle || ''} ${market.ticker}`.toLowerCase();
       
       let score = 0;
+      
+      // Exact phrase match (highest weight)
+      if (searchableText.includes(normalized)) {
+        score += 100;
+      }
+      
+      // Individual term matches
       for (const term of searchTerms) {
         if (searchableText.includes(term)) {
-          score += 1;
+          // Higher score for title matches
+          if (market.title.toLowerCase().includes(term)) {
+            score += 3;
+          } else {
+            score += 1;
+          }
         }
       }
       
-      return { market, score };
+      // Bonus for multiple term matches (likely more relevant)
+      const matchedTerms = searchTerms.filter(term => searchableText.includes(term));
+      if (matchedTerms.length > 1) {
+        score += matchedTerms.length * 2;
+      }
+      
+      return { market, score, matchedTerms: matchedTerms.length };
     });
     
     // Sort by score (highest first)
-    scoredMarkets.sort((a, b) => b.score - a.score);
+    scoredMarkets.sort((a, b) => {
+      // Prioritize by score, then by number of matched terms
+      if (b.score !== a.score) return b.score - a.score;
+      return b.matchedTerms - a.matchedTerms;
+    });
     
     const bestMatch = scoredMarkets[0];
     
-    if (bestMatch.score === 0) {
-      console.warn(`No matching market found for: ${marketDescription}`);
+    // Require minimum score threshold
+    if (bestMatch.score < 3) {
+      console.warn(`❌ No good match found for: "${marketDescription}" (best score: ${bestMatch.score})`);
       return null;
     }
     
-    console.log(`✅ Found match: ${bestMatch.market.ticker} - "${bestMatch.market.title}" (score: ${bestMatch.score})`);
+    console.log(`✅ Found match: ${bestMatch.market.ticker} - "${bestMatch.market.title}" (score: ${bestMatch.score}, matched terms: ${bestMatch.matchedTerms})`);
     return bestMatch.market.ticker;
     
   } catch (error) {
