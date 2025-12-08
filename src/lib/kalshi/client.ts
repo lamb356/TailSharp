@@ -13,21 +13,41 @@ export interface KalshiMarket {
 
 // Normalize the private key coming from env (base64 or PEM) so OpenSSL on Vercel accepts it
 function normalizePrivateKey(rawKey: string): string {
-  // If env already contains PEM with BEGIN/END, just use it
-  if (rawKey.includes('BEGIN')) {
+  // Already a properly formatted PEM key with proper headers
+  if (rawKey.includes('-----BEGIN') && rawKey.includes('-----END')) {
     return rawKey;
   }
 
-  // Otherwise assume base64-encoded PEM string
-  const decoded = Buffer.from(rawKey, 'base64').toString('utf-8');
-
-  // If decoded already looks like PEM, return as-is
-  if (decoded.includes('BEGIN')) {
-    return decoded;
+  // Decode from base64
+  let decoded: string;
+  try {
+    decoded = Buffer.from(rawKey, 'base64').toString('utf-8');
+  } catch (e) {
+    // If decoding fails, assume it's already decoded
+    decoded = rawKey;
   }
 
-  // Fallback: if in the future you store only the base64 body,
-  // you could reconstruct full PEM here. For now just return decoded.
+  // Check if decoded string contains PEM markers
+  if (decoded.includes('-----BEGIN')) {
+    // Clean up any whitespace issues and ensure proper formatting
+    const lines = decoded.split('\n').map(line => line.trim()).filter(line => line);
+    
+    // Extract header, body, and footer
+    const headerIndex = lines.findIndex(line => line.includes('BEGIN'));
+    const footerIndex = lines.findIndex(line => line.includes('END'));
+    
+    if (headerIndex !== -1 && footerIndex !== -1) {
+      const header = lines[headerIndex];
+      const footer = lines[footerIndex];
+      const body = lines.slice(headerIndex + 1, footerIndex).join('');
+      
+      // Reformat with proper 64-char line breaks (PEM standard)
+      const formattedBody = body.match(/.{1,64}/g)?.join('\n') || body;
+      
+      return `${header}\n${formattedBody}\n${footer}`;
+    }
+  }
+
   return decoded;
 }
 
