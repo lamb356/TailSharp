@@ -1,15 +1,19 @@
 {
-  "signature": "test-sig-123456789",
-  "timestamp": 1733515200,
+  "signature": "test-sig-123abc",
+  "timestamp": 1733623200,
   "type": "SWAP",
-  "description": "Swapped 100 USDC for prediction market tokens",
-  "source": "KALSHI",
+  "description": "Trump wins 2024 election",
+  "source": "POLYMARKET",
   "fee": 5000,
   "feePayer": "4Nd1mBQtrMJVYVfKf2PJy9NZUZdTAsp7D4xWLs4gDB4T",
+  "nativeTransfers": [],
   "tokenTransfers": [
     {
-      "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-      "amount": 100
+      "fromUserAccount": "4Nd1mBQtrMJVYVfKf2PJy9NZUZdTAsp7D4xWLs4gDB4T",
+      "toUserAccount": "polymarket123",
+      "tokenAmount": 50,
+      "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
     }
-  ]
+  ],
+  "accountData": []
 }
