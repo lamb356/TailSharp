@@ -1,15 +1,12 @@
-// src/app/dashboard/page.tsx
 'use client';
 
 import { ConnectButton } from '@/components/wallet/ConnectButton';
 import { useStore } from '@/lib/store/useStore';
 import { useCopyTrades } from '@/lib/store/useCopyTrades';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { NotificationBell } from '@/components/ui/NotificationBell';
 import { CopyTradePanel } from '@/components/traders/CopyTradePanel';
 import { TransactionFeed } from '@/components/traders/TransactionFeed';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { IS_SIMULATION } from '@/lib/env';
 
@@ -60,72 +57,47 @@ export default function Dashboard() {
 
   if (!isAuthenticated) {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-        <nav className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
-          <Link href="/" className="flex items-center gap-2">
-            <Image src="/logo.jpg" alt="TailSharp" width={32} height={32} className="rounded-lg" />
-            <span className="text-xl font-bold text-white">TailSharp</span>
-          </Link>
-          <ConnectButton />
-        </nav>
-        <div className="flex flex-col items-center justify-center py-32 px-6">
-          <h1 className="text-3xl font-bold text-white mb-4">Connect Your Wallet</h1>
-          <p className="text-slate-400 mb-8">Connect your wallet to view your dashboard</p>
-          <ConnectButton />
-        </div>
-      </main>
+      <div className="flex flex-col items-center justify-center py-32 px-6">
+        <h1 className="text-3xl font-bold text-white mb-4">Connect Your Wallet</h1>
+        <p className="text-slate-400 mb-8">Connect your wallet to view your dashboard</p>
+        <ConnectButton />
+      </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      <nav className="flex items-center justify-between px-6 py-4 border-b border-slate-800 sticky top-0 bg-slate-950/80 backdrop-blur-md z-50">
-        <Link href="/" className="flex items-center gap-2">
-          <Image src="/logo.jpg" alt="TailSharp" width={32} height={32} className="rounded-lg" />
-          <span className="text-xl font-bold text-white">TailSharp</span>
-        </Link>
-        <div className="flex items-center gap-4">
-          <Link href="/" className="text-slate-400 hover:text-white transition-colors">
-            Home
-          </Link>
-          <Link href="/markets" className="text-slate-400 hover:text-white transition-colors">
-            Markets
-          </Link>
-          <Link href="/explore" className="text-slate-400 hover:text-white transition-colors">
-            Explore
-          </Link>
-          {DEV_MODE && (
-            <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 text-xs rounded">
-              DEV MODE
-            </span>
-          )}
-          {IS_SIMULATION ? (
-            <span className="inline-flex items-center rounded-full bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-300 ring-1 ring-amber-500/40">
-              Mode: Simulation
-            </span>
-          ) : (
-            <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300 ring-1 ring-emerald-500/40">
-              Mode: Live
-            </span>
-          )}
-          <NotificationBell />
-          <ConnectButton />
-        </div>
-      </nav>
-
-      <div className="max-w-7xl mx-auto px-6 py-12">
+    <div className="p-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-white">Portfolio Dashboard</h1>
             <p className="text-slate-400 mt-1">Track and manage your copy trading positions</p>
           </div>
-          {pendingTradesCount > 0 && (
-            <div className="px-4 py-2 bg-blue-500/20 text-blue-400 rounded-lg text-sm font-medium animate-pulse">
-              {pendingTradesCount} pending trade{pendingTradesCount > 1 ? 's' : ''}
-            </div>
-          )}
+          <div className="flex items-center gap-3">
+            {DEV_MODE && (
+              <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 text-xs rounded">
+                DEV MODE
+              </span>
+            )}
+            {IS_SIMULATION ? (
+              <span className="inline-flex items-center rounded-full bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-300 ring-1 ring-amber-500/40">
+                Mode: Simulation
+              </span>
+            ) : (
+              <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300 ring-1 ring-emerald-500/40">
+                Mode: Live
+              </span>
+            )}
+            {pendingTradesCount > 0 && (
+              <div className="px-4 py-2 bg-blue-500/20 text-blue-400 rounded-lg text-sm font-medium animate-pulse">
+                {pendingTradesCount} pending trade{pendingTradesCount > 1 ? 's' : ''}
+              </div>
+            )}
+          </div>
         </div>
 
+        {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-5">
             <p className="text-slate-400 text-sm">Following</p>
@@ -149,6 +121,7 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Recent Trades */}
         <div className="mb-8 rounded-lg border border-slate-800 bg-slate-900/80 p-4">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-sm font-semibold text-slate-100">Recent Trades</h2>
@@ -205,6 +178,7 @@ export default function Dashboard() {
           )}
         </div>
 
+        {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <h2 className="text-xl font-semibold text-white mb-4">Tracked Traders</h2>
@@ -298,11 +272,11 @@ export default function Dashboard() {
                                   isActive: !settings.isActive,
                                 })
                               }
-                              className={`w-full py-2 rounded-lg text-sm font-medium transition-all ${
+                              className={
                                 settings.isActive
-                                  ? 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-                                  : 'bg-gradient-to-r from-blue-500 to-teal-400 text-white hover:opacity-90'
-                              }`}
+                                  ? 'w-full py-2 rounded-lg text-sm font-medium bg-slate-700 text-slate-300 hover:bg-slate-600 transition-all'
+                                  : 'w-full py-2 rounded-lg text-sm font-medium bg-gradient-to-r from-blue-500 to-teal-400 text-white hover:opacity-90 transition-all'
+                              }
                             >
                               {settings.isActive ? 'Pause' : 'Activate'}
                             </button>
@@ -328,6 +302,6 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

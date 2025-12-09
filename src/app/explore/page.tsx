@@ -1,15 +1,12 @@
-// src/app/explore/page.tsx
 'use client';
 
 import { useState } from 'react';
-import { ConnectButton } from '@/components/wallet/ConnectButton';
 import { AddTrader } from '@/components/traders/AddTrader';
 import { WalletDisplay } from '@/components/traders/WalletDisplay';
 import { useStore } from '@/lib/store/useStore';
 import { useAutoRefresh } from '@/lib/hooks/useAutoRefresh';
 import { WalletData } from '@/lib/solana/tracker';
 import Link from 'next/link';
-import Image from 'next/image';
 
 export default function Explore() {
   const [trackedWallets, setTrackedWallets] = useState<WalletData[]>([]);
@@ -18,7 +15,6 @@ export default function Explore() {
 
   const followingAddresses = copySettings.map((s) => s.traderId);
 
-  // Auto-refresh every 15 seconds
   const { refreshWallets } = useAutoRefresh({
     wallets: trackedWallets,
     setWallets: setTrackedWallets,
@@ -53,29 +49,11 @@ export default function Explore() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      {/* Header */}
-      <nav className="flex items-center justify-between px-6 py-4 border-b border-slate-800 sticky top-0 bg-slate-950/80 backdrop-blur-md z-50">
-        <Link href="/" className="flex items-center gap-2">
-          <Image src="/logo.jpg" alt="TailSharp" width={32} height={32} className="rounded-lg" />
-          <span className="text-xl font-bold text-white">TailSharp</span>
-        </Link>
-        <div className="flex items-center gap-4">
-          <Link href="/" className="text-slate-400 hover:text-white transition-colors">
-            Leaderboard
-          </Link>
-          <Link href="/dashboard" className="text-slate-400 hover:text-white transition-colors">
-            Dashboard
-          </Link>
-          <ConnectButton />
-        </div>
-      </nav>
-
-      <div className="max-w-4xl mx-auto px-6 py-12">
+    <div className="p-8">
+      <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-2">
           <h1 className="text-3xl font-bold text-white">Explore Wallets</h1>
-          
-          {/* Auto-refresh toggle */}
+
           {trackedWallets.length > 0 && (
             <div className="flex items-center gap-3">
               <button
@@ -90,14 +68,10 @@ export default function Explore() {
               <label className="flex items-center gap-2 cursor-pointer">
                 <div
                   onClick={() => setAutoRefresh(!autoRefresh)}
-                  className={`relative w-10 h-6 rounded-full transition-colors ${
-                    autoRefresh ? 'bg-blue-500' : 'bg-slate-700'
-                  }`}
+                  className={'relative w-10 h-6 rounded-full transition-colors ' + (autoRefresh ? 'bg-blue-500' : 'bg-slate-700')}
                 >
                   <div
-                    className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                      autoRefresh ? 'translate-x-5' : 'translate-x-1'
-                    }`}
+                    className={'absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ' + (autoRefresh ? 'translate-x-5' : 'translate-x-1')}
                   />
                 </div>
                 <span className="text-slate-400 text-sm">Auto-refresh</span>
@@ -109,12 +83,15 @@ export default function Explore() {
           Track any Solana wallet to see their positions. Find sharps and follow them.
         </p>
 
-        {/* Add Wallet Form */}
         <AddTrader onAddTrader={handleAddTrader} />
 
-        {/* Example Wallets */}
         <div className="mb-8 p-4 bg-slate-800/30 border border-slate-700 rounded-xl">
-          <p className="text-slate-400 text-sm mb-2">Try these example wallets:</p>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-slate-400 text-sm">Try these example wallets:</p>
+            <Link href="/traders" className="text-blue-400 hover:text-blue-300 text-sm">
+              Browse registered traders →
+            </Link>
+          </div>
           <div className="flex flex-wrap gap-2">
             {[
               { addr: 'vines1vzrYbzLMRdu58ou5XTby4qAqVRLmqo36NKPTg', label: 'Vines' },
@@ -135,7 +112,6 @@ export default function Explore() {
           </div>
         </div>
 
-        {/* Tracked Wallets */}
         {trackedWallets.length > 0 && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -168,6 +144,6 @@ export default function Explore() {
           </div>
         )}
       </div>
-    </main>
+    </div>
   );
 }

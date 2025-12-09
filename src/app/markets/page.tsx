@@ -1,12 +1,8 @@
-// src/app/markets/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ConnectButton } from '@/components/wallet/ConnectButton';
-import { NotificationBell } from '@/components/ui/NotificationBell';
 import { Market, getMarkets, formatPrice, formatVolume } from '@/lib/dflow/api';
 import Link from 'next/link';
-import Image from 'next/image';
 
 const CATEGORIES = ['All', 'Crypto', 'Economics', 'Politics', 'Stocks'];
 
@@ -40,29 +36,8 @@ export default function Markets() {
   });
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      {/* Header */}
-      <nav className="flex items-center justify-between px-6 py-4 border-b border-slate-800 sticky top-0 bg-slate-950/80 backdrop-blur-md z-50">
-        <Link href="/" className="flex items-center gap-2">
-          <Image src="/logo.jpg" alt="TailSharp" width={32} height={32} className="rounded-lg" />
-          <span className="text-xl font-bold text-white">TailSharp</span>
-        </Link>
-        <div className="flex items-center gap-4">
-          <Link href="/" className="text-slate-400 hover:text-white transition-colors">
-            Leaderboard
-          </Link>
-          <Link href="/explore" className="text-slate-400 hover:text-white transition-colors">
-            Explore
-          </Link>
-          <Link href="/dashboard" className="text-slate-400 hover:text-white transition-colors">
-            Dashboard
-          </Link>
-          <NotificationBell />
-          <ConnectButton />
-        </div>
-      </nav>
-
-      <div className="max-w-6xl mx-auto px-6 py-12">
+    <div className="p-8">
+      <div className="max-w-6xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">Prediction Markets</h1>
           <p className="text-slate-400">Trade on real-world events via tokenized Kalshi markets</p>
@@ -70,7 +45,6 @@ export default function Markets() {
 
         {/* Filters */}
         <div className="flex flex-col md:flex-row gap-4 mb-8">
-          {/* Search */}
           <div className="flex-1">
             <input
               type="text"
@@ -81,17 +55,16 @@ export default function Markets() {
             />
           </div>
 
-          {/* Category Tabs */}
           <div className="flex gap-2">
             {CATEGORIES.map((category) => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                className={
                   selectedCategory === category
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-slate-800 text-slate-400 hover:text-white'
-                }`}
+                    ? 'px-4 py-2 rounded-lg font-medium bg-blue-500 text-white transition-all'
+                    : 'px-4 py-2 rounded-lg font-medium bg-slate-800 text-slate-400 hover:text-white transition-all'
+                }
               >
                 {category}
               </button>
@@ -111,10 +84,9 @@ export default function Markets() {
             {filteredMarkets.map((market) => (
               <Link
                 key={market.id}
-                href={`/markets/${market.id}`}
+                href={'/markets/' + market.id}
                 className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 hover:border-slate-600 transition-all group"
               >
-                {/* Header */}
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
@@ -129,7 +101,6 @@ export default function Markets() {
                   </div>
                 </div>
 
-                {/* Prices */}
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-3 text-center">
                     <p className="text-green-400 text-2xl font-bold">{formatPrice(market.yesPrice)}</p>
@@ -141,7 +112,6 @@ export default function Markets() {
                   </div>
                 </div>
 
-                {/* Stats */}
                 <div className="flex items-center justify-between text-sm">
                   <div>
                     <span className="text-slate-500">24h Vol: </span>
@@ -168,6 +138,6 @@ export default function Markets() {
           </div>
         )}
       </div>
-    </main>
+    </div>
   );
 }
