@@ -1,8 +1,8 @@
-// src/lib/trading/tradeExecutor.ts
 import { ParsedTrade } from './transactionParser';
 import { CopyDecision } from './copyEngine';
 import { KalshiClient } from '../kalshi/client';
 import { findMatchingTicker } from '../kalshi/marketMatcher';
+import { IS_SIMULATION_SERVER } from '../env';
 
 export interface ExecutedTrade {
   id: string;
@@ -17,19 +17,15 @@ export interface ExecutedTrade {
   isSimulation?: boolean;
 }
 
-/**
- * Execute a copy trade via Kalshi API with smart market matching
- * Supports simulation mode for testing without real funds
- */
 export async function executeCopyTrade(
   trade: ParsedTrade,
   decision: CopyDecision
 ): Promise<ExecutedTrade> {
-  const tradeId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-  const isSimulation = process.env.TAILSHARP_SIMULATION === 'true';
+  const tradeId = Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+  const isSimulation = IS_SIMULATION_SERVER;
 
   try {
-    console.log('🔄 Executing copy trade:', {
+    console.log('[TradeExecutor] Executing copy trade:', {
       market: trade.market,
       side: trade.side,
       amount: decision.positionSize,
@@ -37,34 +33,29 @@ export async function executeCopyTrade(
       simulation: isSimulation,
     });
 
-    // Initialize Kalshi client
     const client = new KalshiClient(
       process.env.KALSHI_API_KEY_ID!,
       process.env.KALSHI_PRIVATE_KEY!,
       process.env.KALSHI_USE_DEMO === 'true'
     );
 
-    // Find matching Kalshi ticker
-    console.log('🔍 Finding matching Kalshi market...');
+    console.log('[TradeExecutor] Finding matching Kalshi market...');
     const kalshiTicker = await findMatchingTicker(client, trade.market);
-    
+
     if (!kalshiTicker) {
-      throw new Error(`No matching Kalshi market found for: ${trade.market}`);
+      throw new Error('No matching Kalshi market found for: ' + trade.market);
     }
 
-    // Calculate position size in number of contracts (with fallback)
     const numContracts = Math.ceil(decision.positionSize || 1);
 
-    // SIMULATION MODE - Skip real Kalshi calls
     if (isSimulation) {
-      console.log('🎮 SIMULATION MODE: Skipping real Kalshi API calls');
-      console.log('📊 Simulated order:', {
+      console.log('[TradeExecutor] SIMULATION MODE: Skipping real Kalshi API calls');
+      console.log('[TradeExecutor] Simulated order:', {
         ticker: kalshiTicker,
         contracts: numContracts,
         side: trade.side === 'YES' ? 'yes' : 'no',
       });
 
-      // Simulate a 2-second delay like a real API call
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       return {
@@ -73,12 +64,12 @@ export async function executeCopyTrade(
         decision,
         status: 'executed',
         executedAt: Date.now() / 1000,
-        ourOrderId: `sim-order-${tradeId}`,
+        ourOrderId: 'sim-order-' + tradeId,
         kalshiTicker,
         kalshiResponse: {
           simulated: true,
           order: {
-            order_id: `sim-order-${tradeId}`,
+            order_id: 'sim-order-' + tradeId,
             ticker: kalshiTicker,
             side: trade.side === 'YES' ? 'yes' : 'no',
             action: 'buy',
@@ -90,20 +81,17 @@ export async function executeCopyTrade(
       };
     }
 
-    // REAL MODE - Execute actual Kalshi trades
-    console.log('💰 Checking Kalshi balance...');
+    console.log('[TradeExecutor] LIVE MODE: Checking Kalshi balance...');
     const balanceData = await client.getBalance();
-    console.log('Current balance:', balanceData.balance);
-    
-    // Estimate max cost (assuming worst case: buying at 99 cents per contract)
+    console.log('[TradeExecutor] Current balance:', balanceData.balance);
+
     const estimatedCost = numContracts * 99;
-    
+
     if (balanceData.balance < estimatedCost) {
-      throw new Error(`Insufficient balance: have $${balanceData.balance / 100}, need ~$${estimatedCost / 100}`);
+      throw new Error('Insufficient balance: have $' + (balanceData.balance / 100) + ', need ~$' + (estimatedCost / 100));
     }
 
-    // Execute the order
-    console.log('📊 Placing order on Kalshi:', {
+    console.log('[TradeExecutor] Placing order on Kalshi:', {
       ticker: kalshiTicker,
       contracts: numContracts,
       side: trade.side === 'YES' ? 'yes' : 'no',
@@ -116,7 +104,7 @@ export async function executeCopyTrade(
       trade.side === 'YES' ? 'yes' : 'no'
     );
 
-    console.log('✅ Kalshi order executed:', orderResponse);
+    console.log('[TradeExecutor] Kalshi order executed:', orderResponse);
 
     return {
       id: tradeId,
@@ -130,8 +118,8 @@ export async function executeCopyTrade(
       isSimulation: false,
     };
   } catch (error) {
-    console.error('❌ Trade execution failed:', error);
-    
+    console.error('[TradeExecutor] Trade execution failed:', error);
+
     return {
       id: tradeId,
       originalTrade: trade,

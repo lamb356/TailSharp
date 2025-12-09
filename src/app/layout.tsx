@@ -5,6 +5,8 @@ import './globals.css';
 import { WalletProvider } from '@/components/wallet/WalletProvider';
 import { QueryProvider } from '@/components/providers/QueryProvider';
 import { TransactionWatcher } from '@/components/providers/TransactionWatcher';
+import { Navbar } from '@/components/layout/Navbar';
+
 export const dynamic = 'force-dynamic';
 
 const geistSans = Geist({
@@ -33,7 +35,10 @@ export default function RootLayout({
         <QueryProvider>
           <WalletProvider>
             <TransactionWatcher />
-            {children}
+            <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+              <Navbar />
+              {children}
+            </div>
           </WalletProvider>
         </QueryProvider>
       </body>

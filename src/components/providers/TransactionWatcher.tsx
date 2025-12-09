@@ -1,9 +1,10 @@
-// src/components/providers/TransactionWatcher.tsx
 'use client';
 
 import { useTransactionWatcher } from '@/lib/hooks/useTransactionWatcher';
+import { useTradeNotifications } from '@/lib/hooks/useTradeNotifications';
 
 export const TransactionWatcher = () => {
   useTransactionWatcher(true);
-  return null; // This component just runs the hook
+  useTradeNotifications(true);
+  return null;
 };

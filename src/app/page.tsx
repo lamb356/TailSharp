@@ -1,48 +1,23 @@
 // src/app/page.tsx
-import { ConnectButton } from '@/components/wallet/ConnectButton';
 import { Leaderboard } from '@/components/traders/Leaderboard';
-import { NotificationBell } from '@/components/ui/NotificationBell';
 import Link from 'next/link';
-import Image from 'next/image';
-
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      {/* Header */}
-      <nav className="flex items-center justify-between px-6 py-4 border-b border-slate-800 sticky top-0 bg-slate-950/80 backdrop-blur-md z-50">
-        <div className="flex items-center gap-2">
-        <Image src="/logo.jpg" alt="TailSharp" width={32} height={32} className="rounded-lg" />
-          <span className="text-xl font-bold text-white">TailSharp</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <Link href="/markets" className="text-slate-400 hover:text-white transition-colors">
-            Markets
-          </Link>
-          <Link href="/explore" className="text-slate-400 hover:text-white transition-colors">
-            Explore
-          </Link>
-          <Link href="/dashboard" className="text-slate-400 hover:text-white transition-colors">
-            Dashboard
-          </Link>
-          <Link href="/copy-trades" className="text-slate-400 hover:text-white transition-colors">
-            Copy Trades
-          </Link>
-          <NotificationBell />
-          <ConnectButton />
-        </div>
-      </nav>
-
-
+    <main>
       {/* Hero */}
       <section className="flex flex-col items-center justify-center px-6 py-20 text-center">
         <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-          Copy the <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-teal-400">sharps</span>.
+          Copy the{' '}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-teal-400">
+            sharps
+          </span>
+          .
           <br />
           Trade the future.
         </h1>
         <p className="text-xl text-slate-400 max-w-2xl mb-10">
-          Auto-mirror top prediction market traders on tokenized Kalshi markets via Solana. 
+          Auto-mirror top prediction market traders on tokenized Kalshi markets via Solana.
           One click. Real-time. On-chain.
         </p>
         <div className="flex gap-4">
@@ -61,7 +36,6 @@ export default function Home() {
         </div>
       </section>
 
-
       {/* Stats */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6 px-6 max-w-5xl mx-auto mb-12">
         <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 text-center">
@@ -78,10 +52,8 @@ export default function Home() {
         </div>
       </section>
 
-
       {/* Leaderboard */}
       <Leaderboard />
-
 
       {/* Footer */}
       <footer className="border-t border-slate-800 mt-20 py-8 px-6 text-center text-slate-500 text-sm">

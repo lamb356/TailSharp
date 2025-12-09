@@ -10,21 +10,53 @@ import { CopyTradePanel } from '@/components/traders/CopyTradePanel';
 import { TransactionFeed } from '@/components/traders/TransactionFeed';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { IS_SIMULATION } from '@/lib/env';
 
 export const dynamic = 'force-dynamic';
 
-// Enable this for testing without wallet
 const DEV_MODE = true;
+
+type RecentTrade = {
+  id: string;
+  originalTrade: {
+    market: string;
+    side: 'YES' | 'NO';
+    amount: number;
+    walletAddress: string;
+    timestamp: number;
+  };
+  status: 'pending' | 'executed' | 'failed';
+  kalshiTicker?: string;
+  isSimulation?: boolean;
+};
 
 export default function Dashboard() {
   const { connected } = useWallet();
   const { copySettings, removeCopySettings, updateCopySettings } = useStore();
   const { simulatedTrades } = useCopyTrades();
   const [expandedTrader, setExpandedTrader] = useState<string | null>(null);
+  const [recentTrades, setRecentTrades] = useState<RecentTrade[]>([]);
+  const [tradesLoading, setTradesLoading] = useState(true);
 
   const isAuthenticated = DEV_MODE || connected;
   const pendingTradesCount = simulatedTrades.filter((t) => t.status === 'pending').length;
+
+  useEffect(() => {
+    async function loadRecentTrades() {
+      try {
+        const res = await fetch('/api/executed-trades');
+        const data = await res.json();
+        const trades = (data.trades || []) as RecentTrade[];
+        setRecentTrades(trades.slice(0, 5));
+      } catch {
+        // ignore for now
+      } finally {
+        setTradesLoading(false);
+      }
+    }
+    loadRecentTrades();
+  }, []);
 
   if (!isAuthenticated) {
     return (
@@ -47,7 +79,6 @@ export default function Dashboard() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      {/* Header */}
       <nav className="flex items-center justify-between px-6 py-4 border-b border-slate-800 sticky top-0 bg-slate-950/80 backdrop-blur-md z-50">
         <Link href="/" className="flex items-center gap-2">
           <Image src="/logo.jpg" alt="TailSharp" width={32} height={32} className="rounded-lg" />
@@ -68,6 +99,15 @@ export default function Dashboard() {
               DEV MODE
             </span>
           )}
+          {IS_SIMULATION ? (
+            <span className="inline-flex items-center rounded-full bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-300 ring-1 ring-amber-500/40">
+              Mode: Simulation
+            </span>
+          ) : (
+            <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300 ring-1 ring-emerald-500/40">
+              Mode: Live
+            </span>
+          )}
           <NotificationBell />
           <ConnectButton />
         </div>
@@ -86,7 +126,6 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-5">
             <p className="text-slate-400 text-sm">Following</p>
@@ -110,15 +149,69 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Main Content */}
+        <div className="mb-8 rounded-lg border border-slate-800 bg-slate-900/80 p-4">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-sm font-semibold text-slate-100">Recent Trades</h2>
+            <Link
+              href="/executed-trades"
+              className="text-xs font-medium text-blue-400 hover:text-blue-300"
+            >
+              View all
+            </Link>
+          </div>
+          {tradesLoading && (
+            <p className="text-xs text-slate-500">Loading trades...</p>
+          )}
+          {!tradesLoading && recentTrades.length === 0 && (
+            <p className="text-xs text-slate-500">No trades executed yet.</p>
+          )}
+          {!tradesLoading && recentTrades.length > 0 && (
+            <ul className="space-y-2 text-xs">
+              {recentTrades.map((t) => {
+                const dt = new Date(t.originalTrade.timestamp * 1000);
+                return (
+                  <li
+                    key={t.id}
+                    className="flex items-center justify-between border-t border-slate-800 pt-2 first:border-t-0 first:pt-0"
+                  >
+                    <div className="flex flex-col">
+                      <span className="text-slate-100">
+                        {t.originalTrade.side} - {t.originalTrade.market}
+                      </span>
+                      <span className="text-slate-500">
+                        {t.originalTrade.amount} contracts - {t.originalTrade.walletAddress.slice(0, 4)}...{t.originalTrade.walletAddress.slice(-4)}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <span className="block text-slate-500">
+                        {dt.toLocaleTimeString()}
+                      </span>
+                      <span
+                        className={
+                          t.status === 'executed'
+                            ? 'text-green-400'
+                            : t.status === 'failed'
+                            ? 'text-red-400'
+                            : 'text-yellow-400'
+                        }
+                      >
+                        {t.status}
+                      </span>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left: Following List (2/3 width) */}
           <div className="lg:col-span-2">
             <h2 className="text-xl font-semibold text-white mb-4">Tracked Traders</h2>
 
             {copySettings.length === 0 ? (
               <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-8 text-center">
-                <p className="text-slate-400 mb-4">You&apos;re not following any traders yet</p>
+                <p className="text-slate-400 mb-4">You are not following any traders yet</p>
                 <Link
                   href="/"
                   className="inline-block px-6 py-3 bg-gradient-to-r from-blue-500 to-teal-400 text-white font-semibold rounded-xl hover:opacity-90 transition-all"
@@ -130,7 +223,7 @@ export default function Dashboard() {
               <div className="space-y-4">
                 {copySettings.map((settings) => {
                   const isExpanded = expandedTrader === settings.traderId;
-                  
+
                   return (
                     <div
                       key={settings.traderId}
@@ -148,9 +241,9 @@ export default function Dashboard() {
                               </p>
                               <p className="text-sm">
                                 {settings.isActive ? (
-                                  <span className="text-green-400">● Active</span>
+                                  <span className="text-green-400">Active</span>
                                 ) : (
-                                  <span className="text-slate-500">● Paused</span>
+                                  <span className="text-slate-500">Paused</span>
                                 )}
                               </p>
                             </div>
@@ -171,7 +264,6 @@ export default function Dashboard() {
                           </div>
                         </div>
 
-                        {/* Settings Grid */}
                         <div className="grid grid-cols-3 gap-3">
                           <div>
                             <label className="text-slate-500 text-xs block mb-1">Allocation (USD)</label>
@@ -218,7 +310,6 @@ export default function Dashboard() {
                         </div>
                       </div>
 
-                      {/* Transaction Feed (Expandable) */}
                       {isExpanded && (
                         <div className="border-t border-slate-700 bg-slate-900/50 p-5">
                           <h3 className="text-sm font-medium text-slate-300 mb-3">Recent Activity</h3>
@@ -232,7 +323,6 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* Right: Copy Trade Panel (1/3 width) */}
           <div className="lg:col-span-1">
             <CopyTradePanel />
           </div>

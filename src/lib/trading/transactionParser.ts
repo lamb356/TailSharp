@@ -1,5 +1,3 @@
-// src/lib/trading/transactionParser.ts
-
 export interface ParsedTrade {
   market: string;
   side: 'YES' | 'NO';
@@ -10,37 +8,40 @@ export interface ParsedTrade {
   timestamp: number;
 }
 
-/**
- * Parse a Helius enhanced transaction into trade details
- */
 export function parseTransaction(tx: any): ParsedTrade | null {
   try {
     const description = tx.description || '';
     
-    // Basic heuristic: look for swap/trade-like transactions
     if (!description && !tx.tokenTransfers?.length) {
       return null;
     }
 
-    // Extract market name from description or use a fallback
     let marketName = 'unknown-market';
-    
     if (description) {
-      // Use the description as the market name (Kalshi matcher will find the right ticker)
       marketName = description;
     }
 
-    // Determine side (YES/NO) - default to YES, but could be enhanced
-    const side: 'YES' | 'NO' = Math.random() > 0.5 ? 'YES' : 'NO';
+    // Determine side from description or default
+    let side: 'YES' | 'NO' = 'YES';
+    const lowerDesc = description.toLowerCase();
+    if (lowerDesc.includes(' no ') || lowerDesc.startsWith('no ') || lowerDesc.endsWith(' no')) {
+      side = 'NO';
+    }
+    
+    // Check for explicit side in source field
+    if (tx.side === 'NO' || tx.side === 'no') {
+      side = 'NO';
+    } else if (tx.side === 'YES' || tx.side === 'yes') {
+      side = 'YES';
+    }
 
-    // Extract amount from token transfers if available
-    const amount = tx.tokenTransfers?.[0]?.tokenAmount || 100;
+    const amount = tx.tokenTransfers?.[0]?.tokenAmount || tx.amount || 100;
 
     return {
       market: marketName,
       side: side,
       amount: amount,
-      price: 0.65, // Default price, could be calculated from transaction data
+      price: 0.65,
       walletAddress: tx.feePayer,
       signature: tx.signature,
       timestamp: tx.timestamp || Date.now() / 1000,
@@ -51,17 +52,31 @@ export function parseTransaction(tx: any): ParsedTrade | null {
   }
 }
 
-/**
- * Check if a transaction is a prediction market trade
- */
 export function isPredictionMarketTrade(tx: any): boolean {
   const description = tx.description?.toLowerCase() || '';
+  const source = tx.source?.toLowerCase() || '';
   
-  return (
-    description.includes('swap') ||
-    description.includes('trade') ||
-    description.includes('prediction') ||
-    description.includes('market') ||
-    tx.tokenTransfers?.length > 0
-  );
+  // Check source for known prediction market platforms
+  const predictionSources = ['polymarket', 'kalshi', 'predictit', 'manifold', 'metaculus'];
+  if (predictionSources.some(s => source.includes(s))) {
+    return true;
+  }
+  
+  // Check description for prediction market keywords
+  const predictionKeywords = [
+    'swap', 'trade', 'prediction', 'market', 'bet', 'wager',
+    'will ', 'won\'t ', 'trump', 'biden', 'election', 'president',
+    'yes', 'no', 'outcome', 'contract'
+  ];
+  
+  if (predictionKeywords.some(keyword => description.includes(keyword))) {
+    return true;
+  }
+  
+  // Check for token transfers (common in prediction market trades)
+  if (tx.tokenTransfers?.length > 0) {
+    return true;
+  }
+  
+  return false;
 }
