@@ -1,7 +1,7 @@
 // src/app/leaderboard/page.tsx
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Fragment } from 'react';
 import Link from 'next/link';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
@@ -326,10 +326,9 @@ export default function LeaderboardPage() {
               {!loading && traders.length > 0 && (
                 <div className="divide-y divide-slate-700/50">
                   {traders.map((trader) => (
-                    <>
+                    <Fragment key={trader.username}>
                       {/* Desktop Row */}
                       <div
-                        key={`desktop-${trader.username}`}
                         className={`hidden lg:grid lg:grid-cols-12 gap-4 px-6 py-4 items-center hover:bg-slate-700/30 transition-colors ${
                           trader.rank <= 3 ? getRankStyle(trader.rank) : ''
                         }`}
@@ -405,7 +404,6 @@ export default function LeaderboardPage() {
 
                       {/* Mobile Row */}
                       <div
-                        key={`mobile-${trader.username}`}
                         className={`lg:hidden grid grid-cols-[auto_1fr_80px_80px_80px_80px] gap-2 px-3 py-3 items-center hover:bg-slate-700/30 transition-colors ${
                           trader.rank <= 3 ? getRankStyle(trader.rank) : ''
                         }`}
@@ -464,7 +462,7 @@ export default function LeaderboardPage() {
                           </button>
                         </div>
                       </div>
-                    </>
+                    </Fragment>
                   ))}
                 </div>
               )}
