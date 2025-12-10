@@ -10,7 +10,8 @@
       "Bash(printf \"tailsharp-admin-secret-2024\\n\")",
       "Bash(vercel --prod:*)",
       "Bash(vercel env:*)",
-      "Bash(vercel alias:*)"
+      "Bash(vercel alias:*)",
+      "Bash(npm install:*)"
     ]
   }
 }

@@ -20,8 +20,45 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'TailSharp | Copy Trading for Prediction Markets',
-  description: 'Copy the sharps. Auto-mirror top prediction market traders on tokenized Kalshi markets via Solana.',
+  title: 'TailSharp | Copy Elite Prediction Market Traders',
+  description: 'Automatically mirror winning strategies from top Solana traders to Kalshi. Real-time copy trading for prediction markets.',
+  keywords: ['prediction markets', 'copy trading', 'Solana', 'Kalshi', 'trading', 'crypto'],
+  authors: [{ name: 'TailSharp' }],
+  creator: 'TailSharp',
+  metadataBase: new URL('https://tail-sharp.vercel.app'),
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://tail-sharp.vercel.app',
+    siteName: 'TailSharp',
+    title: 'TailSharp | Copy Elite Prediction Market Traders',
+    description: 'Automatically mirror winning strategies from top Solana traders to Kalshi. Real-time copy trading for prediction markets.',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'TailSharp - Copy Elite Prediction Market Traders',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'TailSharp | Copy Elite Prediction Market Traders',
+    description: 'Automatically mirror winning strategies from top Solana traders to Kalshi. Real-time copy trading for prediction markets.',
+    images: ['/og-image.png'],
+    creator: '@tailsharp',
+  },
+  icons: {
+    icon: [
+      { url: '/logo.jpg', type: 'image/jpeg' },
+    ],
+    apple: [
+      { url: '/logo.jpg', type: 'image/jpeg' },
+    ],
+    shortcut: '/logo.jpg',
+  },
+  manifest: '/site.webmanifest',
 };
 
 export default function RootLayout({
