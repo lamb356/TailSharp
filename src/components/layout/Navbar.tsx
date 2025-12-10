@@ -19,6 +19,7 @@ export function Navbar() {
     { href: '/how-it-works', label: 'How It Works' },
     { href: '/explore', label: 'Explore' },
     { href: '/dashboard', label: 'Dashboard' },
+    { href: '/analytics', label: 'Analytics' },
     { href: '/copy-trades', label: 'Copy Trades' },
     { href: '/executed-trades', label: 'Trades' },
     { href: '/settings', label: 'Settings' },
