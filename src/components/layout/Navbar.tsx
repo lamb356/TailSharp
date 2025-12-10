@@ -16,6 +16,7 @@ export function Navbar() {
     { href: '/markets', label: 'Markets' },
     { href: '/traders', label: 'Traders' },
     { href: '/leaderboard', label: 'Leaderboard' },
+    { href: '/how-it-works', label: 'How It Works' },
     { href: '/explore', label: 'Explore' },
     { href: '/dashboard', label: 'Dashboard' },
     { href: '/copy-trades', label: 'Copy Trades' },

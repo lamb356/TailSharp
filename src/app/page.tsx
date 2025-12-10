@@ -592,6 +592,9 @@ export default function Home() {
             <Link href="/leaderboard" className="text-slate-400 hover:text-white transition-colors text-sm">
               Leaderboard
             </Link>
+            <Link href="/how-it-works" className="text-slate-400 hover:text-white transition-colors text-sm">
+              How It Works
+            </Link>
             <Link href="/dashboard" className="text-slate-400 hover:text-white transition-colors text-sm">
               Dashboard
             </Link>
