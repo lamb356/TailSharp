@@ -7,6 +7,7 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { CopyTradePanel } from '@/components/traders/CopyTradePanel';
 import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
 import { FollowingSection } from '@/components/dashboard/FollowingSection';
+import { WhaleAlerts } from '@/components/dashboard/WhaleAlerts';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { IS_SIMULATION } from '@/lib/env';
@@ -186,8 +187,11 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Right Column - Following & Copy Trade Panel */}
+          {/* Right Column - Whale Alerts, Following & Copy Trade Panel */}
           <div className="xl:col-span-1 space-y-6 md:space-y-8">
+            {/* Whale Alerts - Pro Feature */}
+            <WhaleAlerts isPro={false} maxAlerts={5} />
+
             {/* Following Section */}
             <FollowingSection />
 

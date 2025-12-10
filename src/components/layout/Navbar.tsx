@@ -20,6 +20,7 @@ export function Navbar() {
     { href: '/explore', label: 'Explore' },
     { href: '/dashboard', label: 'Dashboard' },
     { href: '/analytics', label: 'Analytics' },
+    { href: '/whale-alerts', label: 'Whales' },
     { href: '/copy-trades', label: 'Copy Trades' },
     { href: '/executed-trades', label: 'Trades' },
     { href: '/settings', label: 'Settings' },
