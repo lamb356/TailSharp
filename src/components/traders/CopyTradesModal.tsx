@@ -2,8 +2,10 @@
 'use client';
 
 import { FC, useState } from 'react';
+import { useWallet } from '@solana/wallet-adapter-react';
 import { TraderProfile } from '@/types/trader';
 import { useStore } from '@/lib/store/useStore';
+import { NotificationType } from '@/types/notifications';
 
 interface CopyTradesModalProps {
   trader: TraderProfile;
@@ -29,6 +31,7 @@ export const CopyTradesModal: FC<CopyTradesModalProps> = ({
   onClose,
   onSuccess,
 }) => {
+  const { publicKey } = useWallet();
   const { addCopySettings } = useStore();
 
   // Form state
@@ -64,6 +67,24 @@ export const CopyTradesModal: FC<CopyTradesModalProps> = ({
         copyOpenPositions: false,
         isActive: true,
       });
+
+      // Send notification
+      if (publicKey) {
+        try {
+          await fetch('/api/notifications/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              wallet: publicKey.toBase58(),
+              type: NotificationType.TRADER_FOLLOWED,
+              traderId: trader.walletAddress,
+              traderName: trader.displayName,
+            }),
+          });
+        } catch (notifError) {
+          console.error('Failed to send notification:', notifError);
+        }
+      }
 
       onSuccess?.();
       onClose();
