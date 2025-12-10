@@ -12,6 +12,7 @@ export function Navbar() {
  const navLinks = [
   { href: '/markets', label: 'Markets' },
   { href: '/traders', label: 'Traders' },
+  { href: '/leaderboard', label: 'Leaderboard' },
   { href: '/explore', label: 'Explore' },
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/copy-trades', label: 'Copy Trades' },
