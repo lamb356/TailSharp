@@ -153,18 +153,18 @@ export default function LeaderboardPage() {
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 via-purple-600/10 to-teal-600/20" />
         <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
-        <div className="relative max-w-7xl mx-auto px-6 py-16">
+        <div className="relative max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-16">
           <div className="text-center">
-            <h1 className="text-5xl font-bold text-white mb-4">
+            <h1 className="text-3xl md:text-5xl font-bold text-white mb-2 md:mb-4">
               Top <span className="bg-gradient-to-r from-blue-400 to-teal-400 bg-clip-text text-transparent">Traders</span>
             </h1>
-            <p className="text-xl text-slate-400 max-w-2xl mx-auto">
+            <p className="text-base md:text-xl text-slate-400 max-w-2xl mx-auto px-4">
               Discover the best performing prediction market traders and copy their winning strategies
             </p>
           </div>
 
           {/* Time Period Selector */}
-          <div className="flex justify-center mt-8">
+          <div className="flex justify-center mt-6 md:mt-8 overflow-x-auto pb-2 -mx-4 px-4">
             <div className="inline-flex bg-slate-800/80 backdrop-blur-sm rounded-xl p-1 border border-slate-700">
               {TIME_PERIODS.map((tp) => (
                 <button
@@ -173,7 +173,7 @@ export default function LeaderboardPage() {
                     setPeriod(tp.value);
                     setPage(1);
                   }}
-                  className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                  className={`px-3 md:px-6 py-2 md:py-2.5 rounded-lg text-xs md:text-sm font-medium transition-all whitespace-nowrap ${
                     period === tp.value
                       ? 'bg-gradient-to-r from-blue-500 to-teal-400 text-white shadow-lg'
                       : 'text-slate-400 hover:text-white'
@@ -188,44 +188,44 @@ export default function LeaderboardPage() {
       </div>
 
       {/* Leaderboard Table */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-8">
         {/* Top 3 Cards (Mobile/Tablet) */}
         {!loading && traders.length >= 3 && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 lg:hidden">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-6 md:mb-8 lg:hidden">
             {traders.slice(0, 3).map((trader) => (
               <div
                 key={trader.username}
-                className={`relative rounded-2xl border p-6 ${getRankStyle(trader.rank)}`}
+                className={`relative rounded-xl md:rounded-2xl border p-4 md:p-6 ${getRankStyle(trader.rank)}`}
               >
-                <div className="absolute -top-3 -left-3">
+                <div className="absolute -top-2 -left-2 md:-top-3 md:-left-3">
                   {getRankBadge(trader.rank)}
                 </div>
-                <div className="pt-4 text-center">
-                  <div className="w-16 h-16 mx-auto bg-gradient-to-br from-blue-500 to-teal-400 rounded-full flex items-center justify-center text-2xl font-bold text-white mb-3">
+                <div className="pt-2 md:pt-4 text-center">
+                  <div className="w-12 h-12 md:w-16 md:h-16 mx-auto bg-gradient-to-br from-blue-500 to-teal-400 rounded-full flex items-center justify-center text-xl md:text-2xl font-bold text-white mb-2 md:mb-3">
                     {trader.displayName.charAt(0).toUpperCase()}
                   </div>
                   <Link
                     href={`/traders/${trader.username}`}
-                    className="text-lg font-semibold text-white hover:text-blue-400 transition-colors"
+                    className="text-base md:text-lg font-semibold text-white hover:text-blue-400 transition-colors"
                   >
                     {trader.displayName}
                   </Link>
-                  <p className="text-slate-400 text-sm">@{trader.username}</p>
-                  <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
+                  <p className="text-slate-400 text-xs md:text-sm">@{trader.username}</p>
+                  <div className="mt-3 md:mt-4 grid grid-cols-2 gap-2 md:gap-4 text-sm">
                     <div>
-                      <p className={`text-lg font-bold ${trader.stats.roi >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      <p className={`text-base md:text-lg font-bold ${trader.stats.roi >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                         {trader.stats.roi >= 0 ? '+' : ''}{trader.stats.roi.toFixed(1)}%
                       </p>
-                      <p className="text-slate-500">ROI</p>
+                      <p className="text-slate-500 text-xs">ROI</p>
                     </div>
                     <div>
-                      <p className="text-lg font-bold text-white">{trader.stats.winRate.toFixed(0)}%</p>
-                      <p className="text-slate-500">Win Rate</p>
+                      <p className="text-base md:text-lg font-bold text-white">{trader.stats.winRate.toFixed(0)}%</p>
+                      <p className="text-slate-500 text-xs">Win Rate</p>
                     </div>
                   </div>
                   <button
                     onClick={() => handleCopy(trader)}
-                    className="w-full mt-4 py-2 bg-gradient-to-r from-blue-500 to-teal-400 text-white font-semibold rounded-xl hover:opacity-90 transition-all"
+                    className="w-full mt-3 md:mt-4 py-2 text-sm md:text-base bg-gradient-to-r from-blue-500 to-teal-400 text-white font-semibold rounded-lg md:rounded-xl hover:opacity-90 transition-all"
                   >
                     Copy Trader
                   </button>
@@ -235,179 +235,261 @@ export default function LeaderboardPage() {
           </div>
         )}
 
-        {/* Desktop Table */}
-        <div className="bg-slate-800/50 border border-slate-700 rounded-2xl overflow-hidden">
-          {/* Table Header */}
-          <div className="hidden lg:grid lg:grid-cols-12 gap-4 px-6 py-4 bg-slate-900/50 border-b border-slate-700 text-sm font-medium text-slate-400">
-            <div className="col-span-1">Rank</div>
-            <div className="col-span-3">Trader</div>
-            <button
-              onClick={() => handleSort('roi')}
-              className="col-span-2 flex items-center gap-1 hover:text-white transition-colors"
-            >
-              ROI <SortIcon field="roi" />
-            </button>
-            <button
-              onClick={() => handleSort('winRate')}
-              className="col-span-1 flex items-center gap-1 hover:text-white transition-colors"
-            >
-              Win % <SortIcon field="winRate" />
-            </button>
-            <button
-              onClick={() => handleSort('totalTrades')}
-              className="col-span-1 flex items-center gap-1 hover:text-white transition-colors"
-            >
-              Trades <SortIcon field="totalTrades" />
-            </button>
-            <button
-              onClick={() => handleSort('totalVolume')}
-              className="col-span-2 flex items-center gap-1 hover:text-white transition-colors"
-            >
-              Volume <SortIcon field="totalVolume" />
-            </button>
-            <button
-              onClick={() => handleSort('followers')}
-              className="col-span-1 flex items-center gap-1 hover:text-white transition-colors"
-            >
-              Followers <SortIcon field="followers" />
-            </button>
-            <div className="col-span-1"></div>
-          </div>
-
-          {/* Loading State */}
-          {loading && (
-            <div className="p-6 space-y-4">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="animate-pulse flex items-center gap-4">
-                  <div className="w-10 h-10 bg-slate-700 rounded-full" />
-                  <div className="w-12 h-12 bg-slate-700 rounded-full" />
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-slate-700 rounded w-1/3" />
-                    <div className="h-3 bg-slate-700 rounded w-1/4" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Empty State */}
-          {!loading && traders.length === 0 && (
-            <div className="p-12 text-center">
-              <p className="text-slate-400 mb-4">No traders found</p>
-              <Link
-                href="/traders"
-                className="text-blue-400 hover:text-blue-300"
-              >
-                Browse all traders
-              </Link>
-            </div>
-          )}
-
-          {/* Table Rows */}
-          {!loading && traders.length > 0 && (
-            <div className="divide-y divide-slate-700/50">
-              {traders.map((trader) => (
-                <div
-                  key={trader.username}
-                  className={`grid grid-cols-1 lg:grid-cols-12 gap-4 px-6 py-4 items-center hover:bg-slate-700/30 transition-colors ${
-                    trader.rank <= 3 ? getRankStyle(trader.rank) : ''
-                  }`}
+        {/* Table Container */}
+        <div className="bg-slate-800/50 border border-slate-700 rounded-xl md:rounded-2xl overflow-hidden">
+          {/* Mobile Scrollable Table */}
+          <div className="overflow-x-auto">
+            <div className="min-w-[600px] lg:min-w-0">
+              {/* Table Header */}
+              <div className="hidden lg:grid lg:grid-cols-12 gap-4 px-6 py-4 bg-slate-900/50 border-b border-slate-700 text-sm font-medium text-slate-400">
+                <div className="col-span-1">Rank</div>
+                <div className="col-span-3">Trader</div>
+                <button
+                  onClick={() => handleSort('roi')}
+                  className="col-span-2 flex items-center gap-1 hover:text-white transition-colors"
                 >
-                  {/* Rank */}
-                  <div className="lg:col-span-1 flex items-center gap-3">
-                    {getRankBadge(trader.rank)}
-                    {trader.change !== undefined && trader.change !== 0 && (
-                      <span className={`text-xs ${trader.change > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                        {trader.change > 0 ? '↑' : '↓'}{Math.abs(trader.change)}
-                      </span>
-                    )}
-                  </div>
+                  ROI <SortIcon field="roi" />
+                </button>
+                <button
+                  onClick={() => handleSort('winRate')}
+                  className="col-span-1 flex items-center gap-1 hover:text-white transition-colors"
+                >
+                  Win % <SortIcon field="winRate" />
+                </button>
+                <button
+                  onClick={() => handleSort('totalTrades')}
+                  className="col-span-1 flex items-center gap-1 hover:text-white transition-colors"
+                >
+                  Trades <SortIcon field="totalTrades" />
+                </button>
+                <button
+                  onClick={() => handleSort('totalVolume')}
+                  className="col-span-2 flex items-center gap-1 hover:text-white transition-colors"
+                >
+                  Volume <SortIcon field="totalVolume" />
+                </button>
+                <button
+                  onClick={() => handleSort('followers')}
+                  className="col-span-1 flex items-center gap-1 hover:text-white transition-colors"
+                >
+                  Followers <SortIcon field="followers" />
+                </button>
+                <div className="col-span-1"></div>
+              </div>
 
-                  {/* Trader Info */}
-                  <div className="lg:col-span-3 flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-teal-400 rounded-full flex items-center justify-center text-xl font-bold text-white shrink-0">
-                      {trader.displayName.charAt(0).toUpperCase()}
+              {/* Mobile Table Header */}
+              <div className="lg:hidden grid grid-cols-[auto_1fr_80px_80px_80px_80px] gap-2 px-3 py-3 bg-slate-900/50 border-b border-slate-700 text-xs font-medium text-slate-400">
+                <div className="w-10">#</div>
+                <div className="sticky left-0 bg-slate-900/50 z-10">Trader</div>
+                <button onClick={() => handleSort('roi')} className="flex items-center gap-0.5">
+                  ROI <SortIcon field="roi" />
+                </button>
+                <button onClick={() => handleSort('winRate')} className="flex items-center gap-0.5">
+                  Win% <SortIcon field="winRate" />
+                </button>
+                <button onClick={() => handleSort('totalVolume')} className="flex items-center gap-0.5">
+                  Vol <SortIcon field="totalVolume" />
+                </button>
+                <div></div>
+              </div>
+
+              {/* Loading State */}
+              {loading && (
+                <div className="p-4 md:p-6 space-y-3 md:space-y-4">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className="animate-pulse flex items-center gap-3 md:gap-4">
+                      <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-700 rounded-full" />
+                      <div className="w-10 h-10 md:w-12 md:h-12 bg-slate-700 rounded-full" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-3 md:h-4 bg-slate-700 rounded w-1/3" />
+                        <div className="h-2 md:h-3 bg-slate-700 rounded w-1/4" />
+                      </div>
                     </div>
-                    <div>
-                      <Link
-                        href={`/traders/${trader.username}`}
-                        className="text-white font-medium hover:text-blue-400 transition-colors flex items-center gap-2"
-                      >
-                        {trader.displayName}
-                        {trader.verified && (
-                          <span className="px-1.5 py-0.5 bg-blue-500/20 text-blue-400 text-xs rounded">
-                            ✓
-                          </span>
-                        )}
-                      </Link>
-                      <p className="text-slate-500 text-sm">@{trader.username}</p>
-                    </div>
-                  </div>
-
-                  {/* ROI */}
-                  <div className="lg:col-span-2">
-                    <span className="lg:hidden text-slate-500 text-xs mr-2">ROI:</span>
-                    <span className={`text-lg font-bold ${trader.stats.roi >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {trader.stats.roi >= 0 ? '+' : ''}{trader.stats.roi.toFixed(1)}%
-                    </span>
-                  </div>
-
-                  {/* Win Rate */}
-                  <div className="lg:col-span-1">
-                    <span className="lg:hidden text-slate-500 text-xs mr-2">Win Rate:</span>
-                    <span className="text-white">{trader.stats.winRate.toFixed(0)}%</span>
-                  </div>
-
-                  {/* Trades */}
-                  <div className="lg:col-span-1">
-                    <span className="lg:hidden text-slate-500 text-xs mr-2">Trades:</span>
-                    <span className="text-white">{trader.stats.totalTrades}</span>
-                  </div>
-
-                  {/* Volume */}
-                  <div className="lg:col-span-2">
-                    <span className="lg:hidden text-slate-500 text-xs mr-2">Volume:</span>
-                    <span className="text-white">${(trader.stats.totalVolume / 1000).toFixed(1)}K</span>
-                  </div>
-
-                  {/* Followers */}
-                  <div className="lg:col-span-1">
-                    <span className="lg:hidden text-slate-500 text-xs mr-2">Followers:</span>
-                    <span className="text-white">{trader.stats.followers}</span>
-                  </div>
-
-                  {/* Copy Button */}
-                  <div className="lg:col-span-1">
-                    <button
-                      onClick={() => handleCopy(trader)}
-                      className="w-full lg:w-auto px-4 py-2 bg-gradient-to-r from-blue-500 to-teal-400 text-white text-sm font-semibold rounded-lg hover:opacity-90 transition-all"
-                    >
-                      Copy
-                    </button>
-                  </div>
+                  ))}
                 </div>
-              ))}
+              )}
+
+              {/* Empty State */}
+              {!loading && traders.length === 0 && (
+                <div className="p-8 md:p-12 text-center">
+                  <p className="text-slate-400 mb-4">No traders found</p>
+                  <Link
+                    href="/traders"
+                    className="text-blue-400 hover:text-blue-300"
+                  >
+                    Browse all traders
+                  </Link>
+                </div>
+              )}
+
+              {/* Table Rows - Desktop */}
+              {!loading && traders.length > 0 && (
+                <div className="divide-y divide-slate-700/50">
+                  {traders.map((trader) => (
+                    <>
+                      {/* Desktop Row */}
+                      <div
+                        key={`desktop-${trader.username}`}
+                        className={`hidden lg:grid lg:grid-cols-12 gap-4 px-6 py-4 items-center hover:bg-slate-700/30 transition-colors ${
+                          trader.rank <= 3 ? getRankStyle(trader.rank) : ''
+                        }`}
+                      >
+                        {/* Rank */}
+                        <div className="lg:col-span-1 flex items-center gap-3">
+                          {getRankBadge(trader.rank)}
+                          {trader.change !== undefined && trader.change !== 0 && (
+                            <span className={`text-xs ${trader.change > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                              {trader.change > 0 ? '↑' : '↓'}{Math.abs(trader.change)}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Trader Info */}
+                        <div className="lg:col-span-3 flex items-center gap-3">
+                          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-teal-400 rounded-full flex items-center justify-center text-xl font-bold text-white shrink-0">
+                            {trader.displayName.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <Link
+                              href={`/traders/${trader.username}`}
+                              className="text-white font-medium hover:text-blue-400 transition-colors flex items-center gap-2"
+                            >
+                              {trader.displayName}
+                              {trader.verified && (
+                                <span className="px-1.5 py-0.5 bg-blue-500/20 text-blue-400 text-xs rounded">
+                                  ✓
+                                </span>
+                              )}
+                            </Link>
+                            <p className="text-slate-500 text-sm">@{trader.username}</p>
+                          </div>
+                        </div>
+
+                        {/* ROI */}
+                        <div className="lg:col-span-2">
+                          <span className={`text-lg font-bold ${trader.stats.roi >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {trader.stats.roi >= 0 ? '+' : ''}{trader.stats.roi.toFixed(1)}%
+                          </span>
+                        </div>
+
+                        {/* Win Rate */}
+                        <div className="lg:col-span-1">
+                          <span className="text-white">{trader.stats.winRate.toFixed(0)}%</span>
+                        </div>
+
+                        {/* Trades */}
+                        <div className="lg:col-span-1">
+                          <span className="text-white">{trader.stats.totalTrades}</span>
+                        </div>
+
+                        {/* Volume */}
+                        <div className="lg:col-span-2">
+                          <span className="text-white">${(trader.stats.totalVolume / 1000).toFixed(1)}K</span>
+                        </div>
+
+                        {/* Followers */}
+                        <div className="lg:col-span-1">
+                          <span className="text-white">{trader.stats.followers}</span>
+                        </div>
+
+                        {/* Copy Button */}
+                        <div className="lg:col-span-1">
+                          <button
+                            onClick={() => handleCopy(trader)}
+                            className="px-4 py-2 bg-gradient-to-r from-blue-500 to-teal-400 text-white text-sm font-semibold rounded-lg hover:opacity-90 transition-all"
+                          >
+                            Copy
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Mobile Row */}
+                      <div
+                        key={`mobile-${trader.username}`}
+                        className={`lg:hidden grid grid-cols-[auto_1fr_80px_80px_80px_80px] gap-2 px-3 py-3 items-center hover:bg-slate-700/30 transition-colors ${
+                          trader.rank <= 3 ? getRankStyle(trader.rank) : ''
+                        }`}
+                      >
+                        {/* Rank */}
+                        <div className="w-10 flex items-center justify-center">
+                          <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+                            trader.rank === 1 ? 'bg-gradient-to-br from-yellow-400 to-amber-500' :
+                            trader.rank === 2 ? 'bg-gradient-to-br from-slate-300 to-slate-400' :
+                            trader.rank === 3 ? 'bg-gradient-to-br from-orange-400 to-amber-600' :
+                            'bg-slate-700 text-white'
+                          }`}>
+                            {trader.rank <= 3 ? ['🥇', '🥈', '🥉'][trader.rank - 1] : trader.rank}
+                          </div>
+                        </div>
+
+                        {/* Trader Info - Sticky */}
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-teal-400 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0">
+                            {trader.displayName.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <Link
+                              href={`/traders/${trader.username}`}
+                              className="text-white text-sm font-medium hover:text-blue-400 transition-colors truncate block"
+                            >
+                              {trader.displayName}
+                            </Link>
+                          </div>
+                        </div>
+
+                        {/* ROI */}
+                        <div className="text-center">
+                          <span className={`text-sm font-bold ${trader.stats.roi >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {trader.stats.roi >= 0 ? '+' : ''}{trader.stats.roi.toFixed(0)}%
+                          </span>
+                        </div>
+
+                        {/* Win Rate */}
+                        <div className="text-center">
+                          <span className="text-white text-sm">{trader.stats.winRate.toFixed(0)}%</span>
+                        </div>
+
+                        {/* Volume */}
+                        <div className="text-center">
+                          <span className="text-white text-sm">${(trader.stats.totalVolume / 1000).toFixed(0)}K</span>
+                        </div>
+
+                        {/* Copy Button */}
+                        <div className="text-center">
+                          <button
+                            onClick={() => handleCopy(trader)}
+                            className="px-2 py-1.5 bg-gradient-to-r from-blue-500 to-teal-400 text-white text-xs font-semibold rounded-lg hover:opacity-90 transition-all"
+                          >
+                            Copy
+                          </button>
+                        </div>
+                      </div>
+                    </>
+                  ))}
+                </div>
+              )}
+
             </div>
-          )}
+          </div>
 
           {/* Pagination */}
           {!loading && totalPages > 1 && (
-            <div className="px-6 py-4 border-t border-slate-700 flex items-center justify-between">
-              <p className="text-slate-500 text-sm">
+            <div className="px-4 md:px-6 py-3 md:py-4 border-t border-slate-700 flex items-center justify-between">
+              <p className="text-slate-500 text-xs md:text-sm">
                 Page {page} of {totalPages}
               </p>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="px-4 py-2 bg-slate-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-600 transition-colors"
+                  className="px-3 md:px-4 py-1.5 md:py-2 bg-slate-700 text-white text-sm rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-600 transition-colors"
                 >
-                  Previous
+                  Prev
                 </button>
                 <button
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
-                  className="px-4 py-2 bg-slate-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-600 transition-colors"
+                  className="px-3 md:px-4 py-1.5 md:py-2 bg-slate-700 text-white text-sm rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-600 transition-colors"
                 >
                   Next
                 </button>
@@ -417,15 +499,15 @@ export default function LeaderboardPage() {
         </div>
 
         {/* Call to Action */}
-        <div className="mt-12 text-center">
-          <div className="inline-block bg-gradient-to-r from-blue-500/10 to-teal-500/10 border border-blue-500/20 rounded-2xl p-8">
-            <h3 className="text-2xl font-bold text-white mb-2">Want to be on the leaderboard?</h3>
-            <p className="text-slate-400 mb-6">
+        <div className="mt-8 md:mt-12 text-center px-4">
+          <div className="inline-block bg-gradient-to-r from-blue-500/10 to-teal-500/10 border border-blue-500/20 rounded-xl md:rounded-2xl p-6 md:p-8">
+            <h3 className="text-xl md:text-2xl font-bold text-white mb-2">Want to be on the leaderboard?</h3>
+            <p className="text-slate-400 text-sm md:text-base mb-4 md:mb-6">
               Claim your trader profile and start building your reputation
             </p>
             <Link
               href="/claim"
-              className="inline-block px-8 py-3 bg-gradient-to-r from-blue-500 to-teal-400 text-white font-semibold rounded-xl hover:opacity-90 transition-all"
+              className="inline-block px-6 md:px-8 py-2.5 md:py-3 bg-gradient-to-r from-blue-500 to-teal-400 text-white text-sm md:text-base font-semibold rounded-lg md:rounded-xl hover:opacity-90 transition-all"
             >
               Claim Your Profile
             </Link>

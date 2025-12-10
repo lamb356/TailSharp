@@ -44,28 +44,30 @@ function TradeCard({ trade }: { trade: Trade }) {
   };
 
   return (
-    <div className="bg-slate-900/50 border border-slate-700 rounded-xl p-4 hover:border-slate-600 transition-colors">
-      <div className="flex items-start justify-between gap-4">
+    <div className="bg-slate-900/50 border border-slate-700 rounded-lg md:rounded-xl p-3 md:p-4 hover:border-slate-600 transition-colors">
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2 md:gap-4">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <span className={`px-2 py-0.5 text-xs font-semibold rounded ${
+          <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mb-1">
+            <span className={`px-1.5 md:px-2 py-0.5 text-[10px] md:text-xs font-semibold rounded ${
               isYes ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
             }`}>
               {trade.position.toUpperCase()}
             </span>
-            <span className={`px-2 py-0.5 text-xs rounded ${platformColors[trade.platform]}`}>
+            <span className={`px-1.5 md:px-2 py-0.5 text-[10px] md:text-xs rounded ${platformColors[trade.platform]}`}>
               {trade.platform}
             </span>
             {trade.market.category && (
-              <span className="px-2 py-0.5 text-xs bg-slate-700 text-slate-300 rounded">
+              <span className="px-1.5 md:px-2 py-0.5 text-[10px] md:text-xs bg-slate-700 text-slate-300 rounded">
                 {trade.market.category}
               </span>
             )}
+            {/* Mobile timestamp */}
+            <span className="md:hidden text-slate-500 text-[10px] ml-auto">{formatTime(trade.timestamp)}</span>
           </div>
-          <p className="text-white font-medium truncate">{trade.market.title}</p>
-          <div className="flex items-center gap-4 mt-2 text-sm">
+          <p className="text-white text-sm md:text-base font-medium line-clamp-2 md:truncate">{trade.market.title}</p>
+          <div className="flex flex-wrap items-center gap-2 md:gap-4 mt-1.5 md:mt-2 text-xs md:text-sm">
             <span className="text-slate-400">
-              {isBuy ? 'Bought' : 'Sold'} <span className="text-white">{trade.size.toFixed(0)}</span> contracts
+              {isBuy ? 'Bought' : 'Sold'} <span className="text-white">{trade.size.toFixed(0)}</span>
             </span>
             <span className="text-slate-400">
               @ <span className="text-white">${trade.price.toFixed(2)}</span>
@@ -75,7 +77,8 @@ function TradeCard({ trade }: { trade: Trade }) {
             </span>
           </div>
         </div>
-        <div className="text-right shrink-0">
+        {/* Desktop timestamp and link */}
+        <div className="hidden md:block text-right shrink-0">
           <p className="text-slate-500 text-sm">{formatTime(trade.timestamp)}</p>
           <a
             href={`https://solscan.io/tx/${trade.signature}`}
@@ -86,6 +89,15 @@ function TradeCard({ trade }: { trade: Trade }) {
             {trade.signature.slice(0, 8)}...
           </a>
         </div>
+        {/* Mobile transaction link */}
+        <a
+          href={`https://solscan.io/tx/${trade.signature}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="md:hidden text-[10px] text-blue-400 hover:text-blue-300 font-mono"
+        >
+          View tx: {trade.signature.slice(0, 6)}...
+        </a>
       </div>
     </div>
   );
@@ -171,21 +183,21 @@ export default function TraderProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <div className="text-white text-xl">Loading profile...</div>
+      <div className="flex items-center justify-center py-16 md:py-20 px-4">
+        <div className="text-white text-lg md:text-xl">Loading profile...</div>
       </div>
     );
   }
 
   if (error || !trader) {
     return (
-      <div className="p-8">
-        <div className="max-w-2xl mx-auto text-center py-20">
-          <h1 className="text-4xl font-bold text-white mb-4">Trader Not Found</h1>
-          <p className="text-slate-400 mb-8">{error || 'This trader profile does not exist.'}</p>
+      <div className="p-4 md:p-8">
+        <div className="max-w-2xl mx-auto text-center py-16 md:py-20">
+          <h1 className="text-2xl md:text-4xl font-bold text-white mb-3 md:mb-4">Trader Not Found</h1>
+          <p className="text-slate-400 mb-6 md:mb-8 text-sm md:text-base">{error || 'This trader profile does not exist.'}</p>
           <Link
             href="/traders"
-            className="px-6 py-3 bg-gradient-to-r from-blue-500 to-teal-400 text-white font-semibold rounded-xl hover:opacity-90 transition-all"
+            className="px-5 md:px-6 py-2.5 md:py-3 bg-gradient-to-r from-blue-500 to-teal-400 text-white text-sm md:text-base font-semibold rounded-lg md:rounded-xl hover:opacity-90 transition-all"
           >
             Browse Traders
           </Link>
@@ -200,15 +212,33 @@ export default function TraderProfilePage() {
   const roiPrefix = trader.stats.roi >= 0 ? '+' : '';
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
-        <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-8 mb-8">
-          <div className="flex items-start gap-6">
-            <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-teal-400 rounded-2xl flex items-center justify-center text-4xl font-bold text-white">
-              {trader.displayName.charAt(0).toUpperCase()}
+        {/* Profile Header */}
+        <div className="bg-slate-800/50 border border-slate-700 rounded-xl md:rounded-2xl p-4 md:p-8 mb-4 md:mb-8">
+          <div className="flex flex-col md:flex-row md:items-start gap-4 md:gap-6">
+            {/* Avatar and Name - Mobile layout */}
+            <div className="flex items-center gap-4 md:block">
+              <div className="w-16 h-16 md:w-24 md:h-24 bg-gradient-to-br from-blue-500 to-teal-400 rounded-xl md:rounded-2xl flex items-center justify-center text-2xl md:text-4xl font-bold text-white shrink-0">
+                {trader.displayName.charAt(0).toUpperCase()}
+              </div>
+              {/* Mobile-only name section */}
+              <div className="md:hidden flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <h1 className="text-xl font-bold text-white truncate">{trader.displayName}</h1>
+                  {trader.verified && (
+                    <span className="px-1.5 py-0.5 bg-blue-500/20 text-blue-400 text-[10px] font-semibold rounded-full shrink-0">
+                      Verified
+                    </span>
+                  )}
+                </div>
+                <p className="text-slate-400 text-sm">@{trader.username}</p>
+              </div>
             </div>
+
+            {/* Desktop name and details */}
             <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
+              <div className="hidden md:flex items-center gap-3 mb-2">
                 <h1 className="text-3xl font-bold text-white">{trader.displayName}</h1>
                 {trader.verified && (
                   <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs font-semibold rounded-full">
@@ -216,9 +246,9 @@ export default function TraderProfilePage() {
                   </span>
                 )}
               </div>
-              <p className="text-slate-400 mb-3">@{trader.username}</p>
-              {trader.bio && <p className="text-slate-300 mb-4">{trader.bio}</p>}
-              <div className="flex items-center gap-4 text-sm">
+              <p className="hidden md:block text-slate-400 mb-3">@{trader.username}</p>
+              {trader.bio && <p className="text-slate-300 text-sm md:text-base mb-3 md:mb-4">{trader.bio}</p>}
+              <div className="flex items-center gap-3 md:gap-4 text-xs md:text-sm">
                 <ExternalLink href={solscanUrl} className="text-blue-400 hover:text-blue-300 font-mono">
                   {shortenAddress(trader.walletAddress)}
                 </ExternalLink>
@@ -229,57 +259,62 @@ export default function TraderProfilePage() {
                 )}
               </div>
             </div>
+
+            {/* Copy Button - Full width on mobile */}
             <button
               onClick={handleCopyTrades}
-              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-teal-400 text-white font-semibold rounded-xl hover:opacity-90 transition-all"
+              className="w-full md:w-auto px-5 md:px-6 py-2.5 md:py-3 bg-gradient-to-r from-blue-500 to-teal-400 text-white text-sm md:text-base font-semibold rounded-lg md:rounded-xl hover:opacity-90 transition-all mt-2 md:mt-0"
             >
               {connected ? 'Copy Trades' : 'Connect to Follow'}
             </button>
           </div>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 text-center">
-            <p className="text-2xl font-bold text-white">{trader.stats.followers}</p>
-            <p className="text-slate-400 text-sm">Followers</p>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-4 mb-4 md:mb-8">
+          <div className="bg-slate-800/50 border border-slate-700 rounded-lg md:rounded-xl p-3 md:p-4 text-center">
+            <p className="text-lg md:text-2xl font-bold text-white">{trader.stats.followers}</p>
+            <p className="text-slate-400 text-xs md:text-sm">Followers</p>
           </div>
-          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 text-center">
-            <p className="text-2xl font-bold text-white">{trader.stats.totalTrades}</p>
-            <p className="text-slate-400 text-sm">Trades</p>
+          <div className="bg-slate-800/50 border border-slate-700 rounded-lg md:rounded-xl p-3 md:p-4 text-center">
+            <p className="text-lg md:text-2xl font-bold text-white">{trader.stats.totalTrades}</p>
+            <p className="text-slate-400 text-xs md:text-sm">Trades</p>
           </div>
-          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 text-center">
-            <p className={'text-2xl font-bold ' + roiClass}>
+          <div className="bg-slate-800/50 border border-slate-700 rounded-lg md:rounded-xl p-3 md:p-4 text-center">
+            <p className={'text-lg md:text-2xl font-bold ' + roiClass}>
               {roiPrefix}{trader.stats.roi.toFixed(1)}%
             </p>
-            <p className="text-slate-400 text-sm">ROI</p>
+            <p className="text-slate-400 text-xs md:text-sm">ROI</p>
           </div>
-          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 text-center">
-            <p className="text-2xl font-bold text-white">{trader.stats.winRate.toFixed(0)}%</p>
-            <p className="text-slate-400 text-sm">Win Rate</p>
+          <div className="bg-slate-800/50 border border-slate-700 rounded-lg md:rounded-xl p-3 md:p-4 text-center">
+            <p className="text-lg md:text-2xl font-bold text-white">{trader.stats.winRate.toFixed(0)}%</p>
+            <p className="text-slate-400 text-xs md:text-sm">Win Rate</p>
           </div>
-          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 text-center">
-            <p className="text-2xl font-bold text-white">${(trader.stats.totalVolume / 1000).toFixed(1)}K</p>
-            <p className="text-slate-400 text-sm">Volume</p>
+          <div className="bg-slate-800/50 border border-slate-700 rounded-lg md:rounded-xl p-3 md:p-4 text-center col-span-2 md:col-span-1">
+            <p className="text-lg md:text-2xl font-bold text-white">${(trader.stats.totalVolume / 1000).toFixed(1)}K</p>
+            <p className="text-slate-400 text-xs md:text-sm">Volume</p>
           </div>
         </div>
-        <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-8">
-          <h2 className="text-xl font-semibold text-white mb-4">Recent Activity</h2>
+
+        {/* Recent Activity */}
+        <div className="bg-slate-800/50 border border-slate-700 rounded-xl md:rounded-2xl p-4 md:p-8">
+          <h2 className="text-lg md:text-xl font-semibold text-white mb-3 md:mb-4">Recent Activity</h2>
           {tradesLoading ? (
-            <div className="space-y-3">
+            <div className="space-y-2 md:space-y-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="animate-pulse bg-slate-700/50 rounded-xl p-4 h-20" />
+                <div key={i} className="animate-pulse bg-slate-700/50 rounded-lg md:rounded-xl p-3 md:p-4 h-16 md:h-20" />
               ))}
             </div>
           ) : trades.length > 0 ? (
-            <div className="space-y-3">
+            <div className="space-y-2 md:space-y-3">
               {trades.map((trade) => (
                 <TradeCard key={trade.id} trade={trade} />
               ))}
             </div>
           ) : (
-            <div className="text-center py-8">
-              <p className="text-slate-400 mb-2">No trades recorded yet</p>
-              <p className="text-slate-500 text-sm">
-                Trades will appear here once the wallet is monitored via Helius webhooks
+            <div className="text-center py-6 md:py-8">
+              <p className="text-slate-400 mb-2 text-sm md:text-base">No trades recorded yet</p>
+              <p className="text-slate-500 text-xs md:text-sm">
+                Trades will appear here once the wallet is monitored
               </p>
             </div>
           )}

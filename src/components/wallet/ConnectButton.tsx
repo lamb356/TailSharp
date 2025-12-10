@@ -17,12 +17,14 @@ export const ConnectButton = () => {
   }, [publicKey]);
 
   const handleClick = useCallback(() => {
-    if (connected) {
-      disconnect();
-    } else {
-      setVisible(true);
-    }
-  }, [connected, disconnect, setVisible]);
+  console.log('Button clicked!', { connected, setVisible });
+  if (connected) {
+    disconnect();
+  } else {
+    console.log('Opening wallet modal...');
+    setVisible(true);
+  }
+}, [connected, disconnect, setVisible]);
 
   return (
     <button

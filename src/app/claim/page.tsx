@@ -142,7 +142,7 @@ export default function ClaimPage() {
 
             <div className="mb-8">
               <label className="block text-slate-400 text-sm font-medium mb-2">
-                Twitter
+               X (formerly Twitter)
               </label>
               <div className="relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">@</span>

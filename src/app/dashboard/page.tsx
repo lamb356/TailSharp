@@ -57,74 +57,74 @@ export default function Dashboard() {
 
   if (!isAuthenticated) {
     return (
-      <div className="flex flex-col items-center justify-center py-32 px-6">
-        <h1 className="text-3xl font-bold text-white mb-4">Connect Your Wallet</h1>
-        <p className="text-slate-400 mb-8">Connect your wallet to view your dashboard</p>
+      <div className="flex flex-col items-center justify-center py-20 md:py-32 px-4 md:px-6">
+        <h1 className="text-2xl md:text-3xl font-bold text-white mb-4 text-center">Connect Your Wallet</h1>
+        <p className="text-slate-400 mb-8 text-center">Connect your wallet to view your dashboard</p>
         <ConnectButton />
       </div>
     );
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 md:mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white">Portfolio Dashboard</h1>
-            <p className="text-slate-400 mt-1">Track and manage your copy trading positions</p>
+            <h1 className="text-2xl md:text-3xl font-bold text-white">Portfolio Dashboard</h1>
+            <p className="text-slate-400 mt-1 text-sm md:text-base">Track and manage your copy trading positions</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 md:gap-3">
             {DEV_MODE && (
               <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 text-xs rounded">
                 DEV MODE
               </span>
             )}
             {IS_SIMULATION ? (
-              <span className="inline-flex items-center rounded-full bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-300 ring-1 ring-amber-500/40">
-                Mode: Simulation
+              <span className="inline-flex items-center rounded-full bg-amber-500/10 px-2 md:px-3 py-1 text-xs font-medium text-amber-300 ring-1 ring-amber-500/40">
+                Simulation
               </span>
             ) : (
-              <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300 ring-1 ring-emerald-500/40">
-                Mode: Live
+              <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2 md:px-3 py-1 text-xs font-medium text-emerald-300 ring-1 ring-emerald-500/40">
+                Live
               </span>
             )}
             {pendingTradesCount > 0 && (
-              <div className="px-4 py-2 bg-blue-500/20 text-blue-400 rounded-lg text-sm font-medium animate-pulse">
-                {pendingTradesCount} pending trade{pendingTradesCount > 1 ? 's' : ''}
+              <div className="px-3 md:px-4 py-1.5 md:py-2 bg-blue-500/20 text-blue-400 rounded-lg text-xs md:text-sm font-medium animate-pulse">
+                {pendingTradesCount} pending
               </div>
             )}
           </div>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-5">
-            <p className="text-slate-400 text-sm">Following</p>
-            <p className="text-2xl font-bold text-white mt-1">{copySettings.length}</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
+          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 md:p-5">
+            <p className="text-slate-400 text-xs md:text-sm">Following</p>
+            <p className="text-xl md:text-2xl font-bold text-white mt-1">{copySettings.length}</p>
           </div>
-          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-5">
-            <p className="text-slate-400 text-sm">Active Copies</p>
-            <p className="text-2xl font-bold text-white mt-1">
+          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 md:p-5">
+            <p className="text-slate-400 text-xs md:text-sm">Active Copies</p>
+            <p className="text-xl md:text-2xl font-bold text-white mt-1">
               {copySettings.filter((s) => s.isActive).length}
             </p>
           </div>
-          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-5">
-            <p className="text-slate-400 text-sm">Total Allocated</p>
-            <p className="text-2xl font-bold text-white mt-1">
+          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 md:p-5">
+            <p className="text-slate-400 text-xs md:text-sm">Total Allocated</p>
+            <p className="text-xl md:text-2xl font-bold text-white mt-1">
               ${copySettings.reduce((sum, s) => sum + s.allocationUsd, 0).toLocaleString()}
             </p>
           </div>
-          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-5">
-            <p className="text-slate-400 text-sm">Pending Trades</p>
-            <p className="text-2xl font-bold text-blue-400 mt-1">{pendingTradesCount}</p>
+          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 md:p-5">
+            <p className="text-slate-400 text-xs md:text-sm">Pending Trades</p>
+            <p className="text-xl md:text-2xl font-bold text-blue-400 mt-1">{pendingTradesCount}</p>
           </div>
         </div>
 
         {/* Main Content - Two Column Layout */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8">
           {/* Left Column - Activity Feed */}
-          <div className="xl:col-span-2 space-y-8">
+          <div className="xl:col-span-2 space-y-6 md:space-y-8">
             {/* Activity Feed */}
             <ActivityFeed limit={15} autoRefreshInterval={30000} showFilters={true} />
 
@@ -187,7 +187,7 @@ export default function Dashboard() {
           </div>
 
           {/* Right Column - Following & Copy Trade Panel */}
-          <div className="xl:col-span-1 space-y-8">
+          <div className="xl:col-span-1 space-y-6 md:space-y-8">
             {/* Following Section */}
             <FollowingSection />
 
