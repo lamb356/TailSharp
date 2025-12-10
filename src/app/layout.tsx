@@ -5,6 +5,7 @@ import './globals.css';
 import { WalletProvider } from '@/components/wallet/WalletProvider';
 import { QueryProvider } from '@/components/providers/QueryProvider';
 import { TransactionWatcher } from '@/components/providers/TransactionWatcher';
+import { ReferralTracker } from '@/components/providers/ReferralTracker';
 import { Navbar } from '@/components/layout/Navbar';
 
 export const dynamic = 'force-dynamic';
@@ -72,6 +73,7 @@ export default function RootLayout({
         <QueryProvider>
           <WalletProvider>
             <TransactionWatcher />
+            <ReferralTracker />
             <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
               <Navbar />
               {children}
