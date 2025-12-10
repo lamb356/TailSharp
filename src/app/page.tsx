@@ -65,6 +65,13 @@ export default function Home() {
   const [topTraders, setTopTraders] = useState<TraderProfile[]>([]);
   const [loadingTraders, setLoadingTraders] = useState(true);
 
+  // Waitlist state
+  const [waitlistEmail, setWaitlistEmail] = useState('');
+  const [waitlistLoading, setWaitlistLoading] = useState(false);
+  const [waitlistSuccess, setWaitlistSuccess] = useState(false);
+  const [waitlistError, setWaitlistError] = useState('');
+  const [signupCount, setSignupCount] = useState(500);
+
   useEffect(() => {
     async function fetchTopTraders() {
       try {
@@ -81,6 +88,52 @@ export default function Home() {
     }
     fetchTopTraders();
   }, []);
+
+  // Fetch waitlist count
+  useEffect(() => {
+    async function fetchWaitlistCount() {
+      try {
+        const res = await fetch('/api/waitlist');
+        if (res.ok) {
+          const data = await res.json();
+          setSignupCount(data.displayCount || 500);
+        }
+      } catch (error) {
+        console.error('Failed to fetch waitlist count:', error);
+      }
+    }
+    fetchWaitlistCount();
+  }, []);
+
+  const handleWaitlistSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setWaitlistError('');
+    setWaitlistLoading(true);
+
+    try {
+      const res = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: waitlistEmail }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setWaitlistError(data.error || 'Something went wrong');
+        return;
+      }
+
+      setWaitlistSuccess(true);
+      if (data.count) {
+        setSignupCount(data.count);
+      }
+    } catch (error) {
+      setWaitlistError('Failed to join waitlist. Please try again.');
+    } finally {
+      setWaitlistLoading(false);
+    }
+  };
 
   const scrollToHowItWorks = () => {
     document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
@@ -446,6 +499,82 @@ export default function Home() {
               </Link>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Waitlist Section */}
+      <section className="py-20 px-6 relative overflow-hidden">
+        {/* Gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-teal-600/10" />
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-1/4 w-72 h-72 bg-blue-500/20 rounded-full blur-[100px]" />
+          <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-teal-500/20 rounded-full blur-[100px]" />
+        </div>
+
+        <div className="relative max-w-2xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800/80 border border-slate-700 rounded-full mb-6">
+            <span className="text-yellow-400">✨</span>
+            <span className="text-slate-300 text-sm font-medium">
+              {signupCount.toLocaleString()}+ traders on the waitlist
+            </span>
+          </div>
+
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            Get Early Access
+          </h2>
+          <p className="text-lg text-slate-400 mb-8 max-w-lg mx-auto">
+            Join {signupCount.toLocaleString()}+ traders waiting for launch. Be first to copy the best.
+          </p>
+
+          {waitlistSuccess ? (
+            <div className="bg-green-500/10 border border-green-500/30 rounded-2xl p-8">
+              <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-2">You&apos;re on the list!</h3>
+              <p className="text-slate-400">We&apos;ll be in touch soon with exclusive early access.</p>
+            </div>
+          ) : (
+            <form onSubmit={handleWaitlistSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+              <div className="flex-1 relative">
+                <input
+                  type="email"
+                  value={waitlistEmail}
+                  onChange={(e) => setWaitlistEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  required
+                  className="w-full px-5 py-4 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={waitlistLoading}
+                className="px-8 py-4 bg-gradient-to-r from-blue-500 to-teal-400 text-white font-semibold rounded-xl hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/25 whitespace-nowrap"
+              >
+                {waitlistLoading ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Joining...
+                  </span>
+                ) : (
+                  'Join Waitlist'
+                )}
+              </button>
+            </form>
+          )}
+
+          {waitlistError && (
+            <p className="mt-4 text-red-400 text-sm">{waitlistError}</p>
+          )}
+
+          <p className="mt-6 text-slate-500 text-sm">
+            No spam, ever. Unsubscribe anytime.
+          </p>
         </div>
       </section>
 
