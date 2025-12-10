@@ -23,6 +23,7 @@ export function Navbar() {
     { href: '/whale-alerts', label: 'Whales' },
     { href: '/copy-trades', label: 'Copy Trades' },
     { href: '/executed-trades', label: 'Trades' },
+    { href: '/referrals', label: 'Refer & Earn' },
     { href: '/settings', label: 'Settings' },
   ];
 
